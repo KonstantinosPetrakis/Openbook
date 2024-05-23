@@ -1,0 +1,420 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Openbook API Documentation",
+        "description": "This API documentation includes all the endpoints and their descriptions.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000/api",
+            "description": "Local server"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/user/register": {
+            "post": {
+                "tags": ["User"],
+                "summary": "This endpoint is used to create a new user.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/BasicUserFields"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "password": {
+                                                "type": "string",
+                                                "minLength": 8,
+                                                "format": "password"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "required": [
+                                    "email",
+                                    "firstName",
+                                    "lastName",
+                                    "password"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User created successfully."
+                    },
+                    "400": {
+                        "description": "Fields are missing or are invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "User already exists."
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "tags": ["User"],
+                "summary": "This endpoint is used to login a user.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["email", "password"],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User logged in successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "description": "The JWT auth token, valid for 7 days."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Fields are missing or are invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/user/update": {
+            "patch": {
+                "tags": ["User"],
+                "summary": "This endpoint is used to update a user.",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/MostUserFields"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "profileImage": {
+                                                "type": "string",
+                                                "format": "binary",
+                                                "description": "The background image of the user profile; max size is 10MB"
+                                            },
+                                            "backgroundImage": {
+                                                "type": "string",
+                                                "format": "binary",
+                                                "description": "The background image of the user profile; max size is 10MB"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully."
+                    },
+                    "400": {
+                        "description": "Fields are missing or are invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "tags": ["User"],
+                "summary": "This endpoint is used to get a user by id.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/MostUserFields"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "profileImage": {
+                                                    "type": "string"
+                                                },
+                                                "backgroundImage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found."
+                    }
+                }
+            }
+        },
+        "/post/create": {
+            "post": {
+                "tags": ["Post"],
+                "summary": "This endpoint is used to create a new post.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Post created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreationSuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Fields are missing or are invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "ValidationErrorResponse": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "example": "body",
+                            "description": "The location of the error"
+                        },
+                        "value": {
+                            "type": [
+                                "string",
+                                "number",
+                                "integer",
+                                "boolean",
+                                "array",
+                                "object",
+                                "null"
+                            ],
+                            "example": "123"
+                        },
+                        "msg": {
+                            "type": "string",
+                            "example": "Invalid value",
+                            "description": "The error message"
+                        },
+                        "path": {
+                            "type": "string",
+                            "example": "email",
+                            "description": "The path that caused the error, in case of type field it's the field name"
+                        },
+                        "type": {
+                            "type": "string",
+                            "example": "field"
+                        }
+                    }
+                }
+            },
+            "MessageResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CreationSuccessResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The id of the newly created entry."
+                    }
+                }
+            },
+            "BasicUserFields": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "MostUserFields": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/BasicUserFields"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "gender": {
+                                "type": "string",
+                                "enum": [
+                                    "MALE",
+                                    "FEMALE",
+                                    "NON_BINARY",
+                                    "PREFER_NOT_TO_SAY"
+                                ]
+                            },
+                            "relationshipStatus": {
+                                "type": "string",
+                                "nullable": false,
+                                "enum": [
+                                    "SINGLE",
+                                    "IN_A_RELATIONSHIP",
+                                    "ENGAGED",
+                                    "MARRIED",
+                                    "DIVORCED",
+                                    "WIDOWED",
+                                    "COMPLICATED",
+                                    "PREFER_NOT_TO_SAY"
+                                ]
+                            },
+                            "bio": {
+                                "type": "string"
+                            },
+                            "location": {
+                                "type": "string"
+                            },
+                            "occupation": {
+                                "type": "string"
+                            },
+                            "education": {
+                                "type": "string"
+                            },
+                            "hobbies": {
+                                "type": "string"
+                            },
+                            "profileImage": {
+                                "type": "string"
+                            },
+                            "backgroundImage": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "responses": {
+            "UnauthorizedError": {
+                "description": "Invalid or missing credentials/token"
+            }
+        }
+    }
+}

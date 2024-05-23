@@ -1,0 +1,131 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    NON_BINARY
+}
+
+enum RelationshipStatus {
+    SINGLE
+    IN_A_RELATIONSHIP
+    ENGAGED
+    MARRIED
+    DIVORCED
+    WIDOWED
+    COMPLICATED
+}
+
+enum ContentType {
+    TEXT
+    IMAGE
+    VIDEO
+}
+
+enum NotificationType {
+    FRIEND_REQUEST
+    FRIEND_REQUEST_ACCEPTED
+    POST_LIKED
+    POST_COMMENTED
+    MESSAGE_RECIEVED
+}
+
+model User {
+    id              String   @id @default(cuid())
+    joinedAt        DateTime @default(now())
+    lastActive      DateTime @default(now())
+    email           String   @unique
+    password        String
+    firstName       String
+    lastName        String
+    profileImage    String?
+    backgroundImage String?
+
+    gender             Gender?
+    relationshipStatus RelationshipStatus?
+    bio                String              @default("")
+    location           String              @default("")
+    occupation         String              @default("")
+    education          String              @default("")
+    hobbies            String              @default("")
+
+    friendsAdded     Friendship[]   @relation("friendsAdded")
+    friendsAccepted  Friendship[]   @relation("friendsAccepted")
+    posts            Post[]         @relation("posts")
+    postComments     PostComment[]  @relation("postComments")
+    notifications    Notification[] @relation("notifications")
+    sentMessages     Message[]      @relation("sentMessages")
+    recievedMessages Message[]      @relation("recievedMessages")
+}
+
+model Friendship {
+    requestedBy   User      @relation("friendsAdded", fields: [requestedById], references: [id])
+    requestedById String
+    acceptedBy    User      @relation("friendsAccepted", fields: [acceptedById], references: [id])
+    acceptedById  String
+    acceptedAt    DateTime?
+
+    @@id([requestedById, acceptedById])
+}
+
+model Post {
+    id       String        @id @default(cuid())
+    author   User          @relation("posts", fields: [authorId], references: [id])
+    authorId String
+    postedAt DateTime      @default(now())
+    likes    Int           @default(0)
+    content  String?
+    images   PostImage[]   @relation("images")
+    videos   PostVideo[]   @relation("videos")
+    comments PostComment[] @relation("comments")
+}
+
+model PostImage {
+    id     String @id @default(cuid())
+    postId String
+    post   Post   @relation("images", fields: [postId], references: [id])
+}
+
+model PostVideo {
+    id     String @id @default(cuid())
+    postId String
+    post   Post   @relation("videos", fields: [postId], references: [id])
+}
+
+model PostComment {
+    id          String      @id @default(cuid())
+    commentedAt DateTime    @default(now())
+    post        Post        @relation("comments", fields: [postId], references: [id])
+    postId      String
+    author      User        @relation("postComments", fields: [authorId], references: [id])
+    authorId    String
+    content     String?
+    type        ContentType @default(TEXT)
+}
+
+model Notification {
+    id          String           @id @default(cuid())
+    createdAt   DateTime         @default(now())
+    type        NotificationType
+    content     String
+    recipient   User             @relation("notifications", fields: [recipientId], references: [id])
+    recipientId String
+}
+
+model Message {
+    id          String      @id @default(cuid())
+    sentAt      DateTime    @default(now())
+    sender      User        @relation("sentMessages", fields: [senderId], references: [id])
+    senderId    String
+    recipient   User        @relation("recievedMessages", fields: [recipientId], references: [id])
+    recipientId String
+    content     String
+    contentType ContentType @default(TEXT)
+}
