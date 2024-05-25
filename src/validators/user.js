@@ -1,13 +1,7 @@
 import { Gender, RelationshipStatus } from "@prisma/client";
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
 
-async function returnValidationError(req, res, next) {
-    const valResult = validationResult(req);
-    if (!valResult.isEmpty())
-        return res.status(400).json({ errors: valResult.array() });
-
-    next();
-}
+import { escapeUndefined, isEnum, returnValidationError } from "./helpers.js";
 
 export const userRegister = [
     body("email", "Email must be a valid email.").escape().isEmail(),
@@ -26,21 +20,24 @@ export const loginValidator = [
 ];
 
 export const userUpdate = [
-    body("email").escape(),
-    body("firstName").escape(),
-    body("lastName").escape(),
-    body("gender")
+    body("email")
+        .customSanitizer((v) => escapeUndefined(v))
         .optional()
-        .if((value) => value !== "")
-        .isIn(Object.values(Gender)),
-    body("relationshipStatus")
+        .isEmail(),
+    body("firstName")
+        .customSanitizer((v) => escapeUndefined(v))
         .optional()
-        .if((value) => value !== "")
-        .isIn(Object.values(RelationshipStatus)),
-    body("bio").escape(),
-    body("location").escape(),
-    body("occupation").escape(),
-    body("education").escape(),
-    body("hobbies").escape(),
+        .notEmpty(),
+    body("lastName")
+        .customSanitizer((v) => escapeUndefined(v))
+        .optional()
+        .notEmpty(),
+    body("gender").custom((v) => isEnum(v, Gender)),
+    body("relationshipStatus").custom((v) => isEnum(v, RelationshipStatus)),
+    body("bio").customSanitizer((v) => escapeUndefined(v)),
+    body("location").customSanitizer((v) => escapeUndefined(v)),
+    body("occupation").customSanitizer((v) => escapeUndefined(v)),
+    body("education").customSanitizer((v) => escapeUndefined(v)),
+    body("hobbies").customSanitizer((v) => escapeUndefined(v)),
     returnValidationError,
 ];

@@ -1,4 +1,3 @@
-import fs from "fs/promises";
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -10,6 +9,8 @@ import * as validator from "../validators/user.js";
 import {
     checkNamedImageOutOfMany,
     excludeFieldsFromObject,
+    excludeUndefinedFieldsFromObject,
+    formatImageFields,
     updateUserImage,
 } from "../helpers.js";
 
@@ -36,7 +37,7 @@ router.post("/register", validator.userRegister, async (req, res) => {
             message: "User created successfully",
         });
     } catch (error) {
-        return res.sendStatus(409);
+        return res.sendStatus(409); // Conflict
     }
 });
 
@@ -56,6 +57,15 @@ router.post("/login", validator.loginValidator, async (req, res) => {
     });
 });
 
+router.get("", async (req, res) => {
+    return res.json(
+        formatImageFields(excludeFieldsFromObject(req.user, ["password"]), [
+            "profileImage",
+            "backgroundImage",
+        ])
+    );
+});
+
 router.patch(
     "/",
     upload.fields([
@@ -64,21 +74,16 @@ router.patch(
     ]),
     validator.userUpdate,
     async (req, res) => {
-        const valuesToUpdate = Object.entries(matchedData(req)).reduce(
-            (acc, [key, value]) => {
-                if (value !== undefined) acc[key] = value;
-                return acc;
-            },
-            {}
+        const valuesToUpdate = excludeUndefinedFieldsFromObject(
+            matchedData(req)
         );
 
         for (const image of ["profileImage", "backgroundImage"]) {
-            const imageUrl = updateUserImage(
+            valuesToUpdate[image] = updateUserImage(
                 req.user,
                 checkNamedImageOutOfMany(req, image),
                 image
             );
-            if (imageUrl) valuesToUpdate[image] = imageUrl;
         }
 
         await prisma.user.update({
@@ -89,9 +94,5 @@ router.patch(
         return res.sendStatus(200);
     }
 );
-
-router.get("", async (req, res) => {
-    return res.json(excludeFieldsFromObject(req.user, ["password"]));
-});
 
 export default router;
