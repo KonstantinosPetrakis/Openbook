@@ -2,20 +2,19 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
-import { PrismaClient } from "@prisma/client";
 import { matchedData } from "express-validator";
 
 import * as validator from "../validators/user.js";
 import {
-    checkNamedImageOutOfMany,
+    checkNamedFileOutOfMany,
     excludeFieldsFromObject,
     excludeUndefinedFieldsFromObject,
-    formatImageFields,
-    updateUserImage,
+    formatFileFields,
+    updateModelFile,
 } from "../helpers.js";
+import prisma from "../db.js";
 
 const upload = multer();
-const prisma = new PrismaClient();
 const router = express.Router();
 
 router.post("/register", validator.userRegister, async (req, res) => {
@@ -32,10 +31,7 @@ router.post("/register", validator.userRegister, async (req, res) => {
                 ),
             },
         });
-        return res.json({
-            id: user.id,
-            message: "User created successfully",
-        });
+        return res.status(201).json({ id: user.id });
     } catch (error) {
         return res.sendStatus(409); // Conflict
     }
@@ -57,12 +53,12 @@ router.post("/login", validator.loginValidator, async (req, res) => {
     });
 });
 
-router.get("", async (req, res) => {
+router.get("/:id", validator.isValidUser, async (req, res) => {
     return res.json(
-        formatImageFields(excludeFieldsFromObject(req.user, ["password"]), [
-            "profileImage",
-            "backgroundImage",
-        ])
+        formatFileFields(
+            excludeFieldsFromObject(req.query.user, ["password"]),
+            ["profileImage", "backgroundImage"]
+        )
     );
 });
 
@@ -78,11 +74,12 @@ router.patch(
             matchedData(req)
         );
 
-        for (const image of ["profileImage", "backgroundImage"]) {
-            valuesToUpdate[image] = updateUserImage(
+        for (const attribute of ["profileImage", "backgroundImage"]) {
+            valuesToUpdate[attribute] = updateModelFile(
                 req.user,
-                checkNamedImageOutOfMany(req, image),
-                image
+                checkNamedFileOutOfMany(req, attribute),
+                attribute,
+                (model, extension) => `${attribute}_${model.id}.${extension}`
             );
         }
 
@@ -94,5 +91,28 @@ router.patch(
         return res.sendStatus(200);
     }
 );
+
+router.get("/posts/:id", validator.isValidUser, async (req, res) => {
+    const page = Number(req.query.page || 1);
+    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
+
+    const posts = await prisma.post.findMany({
+        where: { authorId: req.queryUser.id },
+        skip: (page - 1) * resultsPerPage,
+        take: resultsPerPage,
+        orderBy: { postedAt: "desc" },
+        
+        include: {
+            files: {
+                select: { file: true },
+            },
+        },
+    });
+
+    for (let post of posts)
+        post.files = post.files.map((file) => `/public/${file.file}`);
+
+    return res.json(posts);
+});
 
 export default router;

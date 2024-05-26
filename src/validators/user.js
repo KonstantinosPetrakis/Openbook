@@ -2,6 +2,18 @@ import { Gender, RelationshipStatus } from "@prisma/client";
 import { body } from "express-validator";
 
 import { escapeUndefined, isEnum, returnValidationError } from "./helpers.js";
+import prisma from "../db.js";
+
+export async function isValidUser(req, res, next) {
+    const user = await prisma.user.findUnique({
+        where: { id: req.params.id },
+    });
+
+    if (!user) return res.sendStatus(404);
+
+    req.queryUser = user;
+    next();
+}
 
 export const userRegister = [
     body("email", "Email must be a valid email.").escape().isEmail(),

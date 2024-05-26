@@ -23,12 +23,6 @@ enum RelationshipStatus {
     COMPLICATED
 }
 
-enum ContentType {
-    TEXT
-    IMAGE
-    VIDEO
-}
-
 enum NotificationType {
     FRIEND_REQUEST
     FRIEND_REQUEST_ACCEPTED
@@ -63,6 +57,7 @@ model User {
     notifications    Notification[] @relation("notifications")
     sentMessages     Message[]      @relation("sentMessages")
     recievedMessages Message[]      @relation("recievedMessages")
+    likedPosts       PostLike[]     @relation("likes")
 }
 
 model Friendship {
@@ -80,34 +75,37 @@ model Post {
     author   User          @relation("posts", fields: [authorId], references: [id])
     authorId String
     postedAt DateTime      @default(now())
-    likes    Int           @default(0)
     content  String?
-    images   PostImage[]   @relation("images")
-    videos   PostVideo[]   @relation("videos")
+    files    PostFile[]    @relation("files")
     comments PostComment[] @relation("comments")
+    likes    PostLike[]    @relation("likes")
 }
 
-model PostImage {
+model PostFile {
     id     String @id @default(cuid())
     postId String
-    post   Post   @relation("images", fields: [postId], references: [id])
+    post   Post   @relation("files", fields: [postId], references: [id])
+    file   String
 }
 
-model PostVideo {
-    id     String @id @default(cuid())
-    postId String
-    post   Post   @relation("videos", fields: [postId], references: [id])
+model PostLike {
+    likedBy   User   @relation("likes", fields: [likedById], references: [id])
+    likedById String
+    post      Post   @relation("likes", fields: [postId], references: [id])
+    postId    String
+
+    @@id([likedById, postId])
 }
 
 model PostComment {
-    id          String      @id @default(cuid())
-    commentedAt DateTime    @default(now())
-    post        Post        @relation("comments", fields: [postId], references: [id])
+    id          String   @id @default(cuid())
+    commentedAt DateTime @default(now())
+    post        Post     @relation("comments", fields: [postId], references: [id])
     postId      String
-    author      User        @relation("postComments", fields: [authorId], references: [id])
+    author      User     @relation("postComments", fields: [authorId], references: [id])
     authorId    String
-    content     String?
-    type        ContentType @default(TEXT)
+    content     String   @default("")
+    file        String?
 }
 
 model Notification {
@@ -127,5 +125,5 @@ model Message {
     recipient   User        @relation("recievedMessages", fields: [recipientId], references: [id])
     recipientId String
     content     String
-    contentType ContentType @default(TEXT)
+    file        String?
 }

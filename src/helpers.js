@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 
-
 /**
  * This function creates the storage directories if they do not exist.
  */
@@ -13,19 +12,19 @@ export async function createStorageDirectories() {
 }
 
 /**
- * This function is used to check if a file uploaded among others 
- * (different file-fields in the same form) and handled by multer
- * with fields and max count 1 is present.
+ * This function is used to check if a file uploaded among others
+ * (different file-fields in the same form) and handled by multer.
  * @param req Request object
  * @param fileName Name of the file to check
- * @returns {object | undefined | null} the file object if present, 
+ * @param {"image" | "video"} fileType Type of the file to check for (default is image)
+ * @returns {object | undefined | null} the file object if present,
  * undefined if not present, and null if the user wants to delete the image.
  */
-export function checkNamedImageOutOfMany(req, fileName) {
+export function checkNamedFileOutOfMany(req, fileName, fileType = "image") {
     if (
         req.files &&
         req.files[fileName] &&
-        req.files[fileName][0].mimetype.startsWith("image")
+        req.files[fileName][0].mimetype.startsWith(fileType)
     )
         return req.files[fileName][0];
     // If a file is present in the body, it means the user wants to delete the image.
@@ -35,23 +34,53 @@ export function checkNamedImageOutOfMany(req, fileName) {
 }
 
 /**
- * This function is used to update the user image based on the type of image.
- * @param {object} user the user object returned from the database
- * @param {object | undefined | null} image the image object returned from multer
- * @param {"profileImage" | "backgroundImage"} type the type of image to update
- * @returns {string | null} the path to the image or null if the image is not present.
+ * This function is used to check if files are uploaded among others
+ * (different file-fields in the same form) and handled by multer.
+ * @param {object} req Request object from express
+ * @param {string} fileName Name of the file array to check
+ * @param {Array<string>} fileType Types of the file to check for, default is images and videos.
+ * @returns {Array<object>} the file objects that are present.
  */
-export function updateUserImage(user, image, type = "profileImage") {
-    if (image === undefined) return user[type];
-    if (image === null) {
-        if (user[type]) fs.unlink(`storage/public/${user[type]}`);
+export function checkNamedFilesOutOfMany(
+    req,
+    fileName,
+    fileType = ["image", "video"]
+) {
+    const files = [];
+
+    if (req.files && req.files[fileName])
+        req.files[fileName].forEach((file) => {
+            if (fileType.some((type) => file.mimetype.startsWith(type)))
+                files.push(file);
+        });
+    return files;
+}
+
+/**
+ * This function is used to update the file field of a model.
+ * @param {object} model the model whose file field is to be updated
+ * @param {object} file the file object returned from multer
+ * @param {string} attribute the attribute of the model to update
+ * @param {Function} fileNameGenerator the function to generate the file name
+ * given the model and the file extension.
+ * @returns {string | null} the path to the updated file or null if the model has no file.
+ */
+export function updateModelFile(
+    model,
+    file,
+    attribute,
+    fileNameGenerator
+) {
+    if (file === undefined) return model[attribute];
+    if (file === null) {
+        if (model[attribute]) fs.unlink(`storage/public/${model[attribute]}`);
         return null;
     }
 
-    if (user[type]) fs.unlink(`storage/public/${user[type]}`);
+    if (model[attribute]) fs.unlink(`storage/public/${model[attribute]}`);
 
-    const fileName = `${type}_${user.id}.${image.mimetype.split("/")[1]}`;
-    fs.writeFile(`storage/public/${fileName}`, image.buffer);
+    const fileName = fileNameGenerator(model, file.mimetype.split("/")[1]);
+    fs.writeFile(`storage/public/${fileName}`, file.buffer);
     return fileName;
 }
 
@@ -67,10 +96,9 @@ export function excludeFieldsFromObject(obj, fields) {
     return newObj;
 }
 
-
 /**
  * This function is used to escape undefined values in an object.
- * @param {object} obj the object to escape undefined values from. 
+ * @param {object} obj the object to escape undefined values from.
  * @returns {object} the new object without the undefined values.
  */
 export function excludeUndefinedFieldsFromObject(obj) {
@@ -87,7 +115,7 @@ export function excludeUndefinedFieldsFromObject(obj) {
  * @param {array<string>} fields the image fields to format.
  * @returns {object} the object with the formatted image fields.
  */
-export function formatImageFields(object, fields) {
+export function formatFileFields(object, fields) {
     const newObj = { ...object };
     fields.forEach((field) => {
         if (newObj[field]) newObj[field] = `/public/${newObj[field]}`;

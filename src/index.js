@@ -7,9 +7,6 @@ import router from "./router.js";
 import { checkToken } from "./middlewares.js";
 import { createStorageDirectories } from "./helpers.js";
 
-// clwi1f8hj000010w4tm5418wn
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNsd2kxZjhoajAwMDAxMHc0dG01NDE4d24iLCJpYXQiOjE3MTYzOTUyNjIsImV4cCI6MTcxNzAwMDA2Mn0.XNS-pCJBDiC1imcGPLvkouIR66yRTOS0ih2hIQzDoLk
-
 dotenv.config();
 
 const app = express();

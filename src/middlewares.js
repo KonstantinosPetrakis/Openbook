@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import prisma from "./db.js";
 
-const prisma = new PrismaClient();
 
 function isPublicPath(path) {
     return ["register", "login", "docs", "public"].some((s) =>
