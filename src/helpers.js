@@ -12,6 +12,24 @@ export async function createStorageDirectories() {
 }
 
 /**
+ * This function is used to get the path in the file system of a public file.
+ * @param {string} fileName  the name of the file.
+ * @returns {string} the path of the file in the file system.
+ */
+export function getPublicFileDirectory(fileName) {
+    return `storage/public/${fileName}`;
+}
+
+/**
+ * This function is used to get the public URL of a file.
+ * @param {string} fileName the name of the file.
+ * @returns {string} the public path of the file.
+ */
+export function getPublicFileURL(fileName) {
+    return `/public/${fileName}`;
+}
+
+/**
  * This function is used to check if a file uploaded among others
  * (different file-fields in the same form) and handled by multer.
  * @param req Request object
@@ -65,22 +83,18 @@ export function checkNamedFilesOutOfMany(
  * given the model and the file extension.
  * @returns {string | null} the path to the updated file or null if the model has no file.
  */
-export function updateModelFile(
-    model,
-    file,
-    attribute,
-    fileNameGenerator
-) {
+export function updateModelFile(model, file, attribute, fileNameGenerator) {
+    const rmFile = () => fs.unlink(getPublicFile(model[attribute]));
     if (file === undefined) return model[attribute];
     if (file === null) {
-        if (model[attribute]) fs.unlink(`storage/public/${model[attribute]}`);
+        if (model[attribute]) rmFile();
         return null;
     }
 
-    if (model[attribute]) fs.unlink(`storage/public/${model[attribute]}`);
+    if (model[attribute]) rmFile();
 
     const fileName = fileNameGenerator(model, file.mimetype.split("/")[1]);
-    fs.writeFile(`storage/public/${fileName}`, file.buffer);
+    fs.writeFile(getPublicFileDirectory(fileName), file.buffer);
     return fileName;
 }
 
@@ -118,7 +132,7 @@ export function excludeUndefinedFieldsFromObject(obj) {
 export function formatFileFields(object, fields) {
     const newObj = { ...object };
     fields.forEach((field) => {
-        if (newObj[field]) newObj[field] = `/public/${newObj[field]}`;
+        if (newObj[field]) newObj[field] = getPublicFileURL(newObj[field]);
     });
     return newObj;
 }

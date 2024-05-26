@@ -12,7 +12,10 @@ import {
     formatFileFields,
     updateModelFile,
 } from "../helpers.js";
-import prisma from "../db.js";
+import prisma, {
+    selectJoinedPostData,
+    processFetchedJoinedPostData,
+} from "../db.js";
 
 const upload = multer();
 const router = express.Router();
@@ -33,7 +36,7 @@ router.post("/register", validator.userRegister, async (req, res) => {
         });
         return res.status(201).json({ id: user.id });
     } catch (error) {
-        return res.sendStatus(409); // Conflict
+        return res.sendStatus(409);
     }
 });
 
@@ -101,16 +104,11 @@ router.get("/posts/:id", validator.isValidUser, async (req, res) => {
         skip: (page - 1) * resultsPerPage,
         take: resultsPerPage,
         orderBy: { postedAt: "desc" },
-        
-        include: {
-            files: {
-                select: { file: true },
-            },
-        },
+        ...selectJoinedPostData(req),
     });
 
-    for (let post of posts)
-        post.files = post.files.map((file) => `/public/${file.file}`);
+    for (let i = 0; i < posts.length; i++)
+        posts[i] = processFetchedJoinedPostData(posts[i]);
 
     return res.json(posts);
 });

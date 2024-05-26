@@ -118,11 +118,11 @@ model Notification {
 }
 
 model Message {
-    id          String      @id @default(cuid())
-    sentAt      DateTime    @default(now())
-    sender      User        @relation("sentMessages", fields: [senderId], references: [id])
+    id          String   @id @default(cuid())
+    sentAt      DateTime @default(now())
+    sender      User     @relation("sentMessages", fields: [senderId], references: [id])
     senderId    String
-    recipient   User        @relation("recievedMessages", fields: [recipientId], references: [id])
+    recipient   User     @relation("recievedMessages", fields: [recipientId], references: [id])
     recipientId String
     content     String
     file        String?

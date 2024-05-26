@@ -7,11 +7,12 @@ import cuid from "cuid";
 import * as validator from "../validators/post.js";
 import {
     checkNamedFilesOutOfMany,
-    excludeFieldsFromObject,
-    formatFileFields,
-    updateModelFile,
+    getPublicFileDirectory,
 } from "../helpers.js";
-import prisma from "../db.js";
+import prisma, {
+    selectJoinedPostData,
+    processFetchedJoinedPostData,
+} from "../db.js";
 
 const upload = multer();
 const router = express.Router();
@@ -33,7 +34,7 @@ router.post(
             data: files.map((file) => {
                 file.id = cuid();
                 const fileName = `${file.id}.${file.mimetype.split("/")[1]}`;
-                fs.writeFile(`storage/public/${fileName}`, file.buffer);
+                fs.writeFile(getPublicFileDirectory(fileName), file.buffer);
                 return {
                     id: file.id,
                     postId: post.id,
@@ -53,57 +54,19 @@ router.delete("/:id", validator.postExists, async (req, res) => {
         where: { postId: req.params.id },
     });
 
-    files.forEach((file) => fs.unlink(`storage/public/${file.file}`));
+    files.forEach((file) => fs.unlink(getPublicFileDirectory(file.file)));
     await prisma.postFile.deleteMany({ where: { postId: req.params.id } });
     await prisma.post.delete({ where: { id: req.params.id } });
     return res.sendStatus(200);
 });
 
-router.get("/:id", async (req, res) => {
-    const post = excludeFieldsFromObject(
-        await prisma.post.findUnique({
-            where: { id: req.params.id },
-            select: {
-                id: true,
-                content: true,
-                postedAt: true,
-                _count: {
-                    select: {
-                        likes: true,
-                    },
-                },
-                author: {
-                    select: {
-                        id: true,
-                        profileImage: true,
-                        firstName: true,
-                        lastName: true,
-                    },
-                },
-                files: {
-                    select: { file: true },
-                },
-                likes: {
-                    where: {
-                        likedById: req.user.id,
-                    },
-                },
-            },
-        }),
-        ["authorId"]
-    );
+router.get("/:id", validator.postExists, async (req, res) => {
+    let post = await prisma.post.findUnique({
+        where: { id: req.params.id },
+        ...selectJoinedPostData(req),
+    });
 
-    if (!post) return res.sendStatus(404);
-
-    post.files = post.files.map(
-        (file) => formatFileFields(file, ["file"]).file
-    );
-
-    post.liked = post.likes.length > 0;
-    post.likes = post._count.likes;
-    delete post._count;
-
-    return res.json(post);
+    return res.json(processFetchedJoinedPostData(post));
 });
 
 router.post("/like/:id", async (req, res) => {
@@ -149,7 +112,7 @@ router.post(
 
         if (file) {
             const fileName = `${cuid()}.${file.mimetype.split("/")[1]}`;
-            fs.writeFile(`storage/public/${fileName}`, file.buffer);
+            fs.writeFile(getPublicFileDirectory(fileName), file.buffer);
             commentData.file = fileName;
         }
 
@@ -161,7 +124,7 @@ router.post(
 router.delete("/comment/:id", validator.commentExists, async (req, res) => {
     if (req.comment.authorId !== req.user.id) return res.sendStatus(403);
 
-    if (req.comment.file) fs.unlink(`storage/public/${req.comment.file}`);
+    if (req.comment.file) fs.unlink(getPublicFileDirectory(req.comment.file));
     await prisma.postComment.delete({ where: { id: req.params.id } });
     return res.sendStatus(200);
 });
@@ -181,6 +144,5 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
 
     return res.json(comments);
 });
-
 
 export default router;
