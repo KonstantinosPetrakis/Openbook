@@ -4,24 +4,24 @@ import { body } from "express-validator";
 import { escapeUndefined, isEnum, returnValidationError } from "./helpers.js";
 import prisma from "../db.js";
 
+
 /**
- * This is a middleware function that checks if a user exists based
- * on the id provided in the query parameters. If the user exists,
- * the user object is attached to the request object. Otherwise, a 404
- * status is sent back to the client.
- * @param {object} req the request object from express.
- * @param {object} res the response object from express.
- * @param {Function} next the next function to call in the middleware chain.
+ * This function is a middleware that checks if the user exists in the database
+ * based on the user id in the request.
+ * @param {"params" | "body"} position where the user id is located 
+ * @returns a middleware function that checks if the user exists in the database.
  */
-export async function isValidUser(req, res, next) {
-    const user = await prisma.user.findUnique({
-        where: { id: req.params.id },
-    });
-
-    if (!user) return res.sendStatus(404);
-
-    req.queryUser = user;
-    next();
+export function isValidUser(position="params") {
+    return async (req, res, next) => {
+        const user = await prisma.user.findUnique({
+            where: { id: req[position].id },
+        });
+    
+        if (!user) return res.sendStatus(404);
+    
+        req.extraUser = user;
+        next();
+    }
 }
 
 export const userRegister = [
