@@ -1,81 +1,34 @@
-const URL = "http:/localhost:3000/api/user/";
-const USER_PASSWORD = "password";
-const USERS_TO_CREATE = 10;
-const VERBOSE = false;
-
-async function authFetch(url, token, options) {
-    return await fetch(url, {
-        ...options,
-        headers: {
-            ...(options?.headers || {}),
-            Authorization: `Bearer ${token}`,
-        },
-    });
-}
-
-function assertEqual(actual, expected) {
-    if (JSON.stringify(actual) === JSON.stringify(expected)) {
-        if (VERBOSE) console.log(`✅ ${actual} = ${expected}`);
-    } else {
-        console.error(`❌ ${actual} != ${expected}`);
-        process.exit(1);
-    }
-}
-
-async function createUser(email, password, firstName, lastName) {
-    const response = await fetch(`${URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, firstName, lastName }),
-    });
-
-    return (await response.json()).id;
-}
-
-async function loginUser(email, password) {
-    const response = await fetch(`${URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-    });
-
-    return (await response.json()).token;
-}
+import { URL, authFetch, assertEqual } from "./helpers.js";
+import { createUsers } from "./user.js";
 
 async function addFriend(token, id) {
-    const response = await authFetch(`${URL}/addFriend/${id}`, token, {
+    const response = await authFetch(`${URL}/user/addFriend/${id}`, token, {
         method: "POST",
     });
     return response.status;
 }
 
 async function getFriendRequests(token) {
-    const response = await authFetch(`${URL}/friendRequests`, token);
+    const response = await authFetch(`${URL}/user/friendRequests`, token);
 
     return (await response.json()).friendRequests;
 }
 
 async function getFriends(token) {
-    const response = await authFetch(`${URL}/friends`, token);
+    const response = await authFetch(`${URL}/user/friends`, token);
     return (await response.json()).friends;
 }
 
 async function deleteFriend(token, id) {
-    const response = await authFetch(`${URL}/deleteFriend/${id}`, token, {
+    const response = await authFetch(`${URL}/user/deleteFriend/${id}`, token, {
         method: "DELETE",
     });
 
     return response.status;
 }
 
-async function main() {
-    const userIds = [];
-    const tokens = [];
-    for (let i = 0; i < USERS_TO_CREATE; i++) {
-        const email = `${crypto.randomUUID()}@example.com`;
-        userIds.push(await createUser(email, USER_PASSWORD, "first", "last"));
-        tokens.push(await loginUser(email, USER_PASSWORD));
-    }
+export async function main() {
+    const { tokens, userIds } = await createUsers();
 
     // Accept friend request
     await addFriend(tokens[0], userIds[1]);
@@ -114,8 +67,4 @@ async function main() {
     assertEqual(await getFriendRequests(tokens[9]), [userIds[8]]);
     await deleteFriend(tokens[9], userIds[8]);
     assertEqual(await getFriendRequests(tokens[9]), []);
-
-    console.log("✅✨🎉 All tests passed!");
 }
-
-main();

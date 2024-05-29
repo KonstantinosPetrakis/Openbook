@@ -1,10 +1,11 @@
 import fs from "fs/promises";
 import express from "express";
-import { body, validationResult, matchedData } from "express-validator";
+import { matchedData } from "express-validator";
 import multer from "multer";
 import cuid from "cuid";
 
 import * as validator from "../validators/post.js";
+import { isValidUser } from "../validators/user.js";
 import {
     checkNamedFilesOutOfMany,
     getPublicFileDirectory,
@@ -143,6 +144,43 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
     });
 
     return res.json(comments);
+});
+
+router.get("/feed", async (req, res) => {
+    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
+    return res.json(
+        processFetchedJoinedPostData(
+            await prisma.post.findMany({
+                where: {
+                    authorId: { in: await friendsOf(req.user) },
+                },
+                orderBy: {
+                    postedAt: "desc",
+                },
+                ...selectJoinedPostData(req),
+                skip: ((request.query.page || 0) - 1) * resultsPerPage,
+                take: resultsPerPage,
+            })
+        )
+    );
+});
+
+router.get("/ofUser/:id", isValidUser(), async (req, res) => {
+    const page = Number(req.query.page || 1);
+    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
+
+    const posts = await prisma.post.findMany({
+        where: { authorId: req.extraUser.id },
+        skip: (page - 1) * resultsPerPage,
+        take: resultsPerPage,
+        orderBy: { postedAt: "desc" },
+        ...selectJoinedPostData(req),
+    });
+
+    for (let i = 0; i < posts.length; i++)
+        posts[i] = processFetchedJoinedPostData(posts[i]);
+
+    return res.json(posts);
 });
 
 export default router;

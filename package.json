@@ -5,7 +5,7 @@
     "scripts": {
         "start": "node ./src/index.js",
         "dev": "nodemon ./src/index.js",
-        "test": "node ./src/tests/friends.js"
+        "test": "node ./src/tests/main.js"
     },
     "type": "module",
     "keywords": [],

@@ -2,13 +2,14 @@ import { PrismaClient } from "@prisma/client";
 
 import { formatFileFields, excludeFieldsFromObject } from "./helpers.js";
 
-export default new PrismaClient();
+const prisma = new PrismaClient();
+export default prisma;
 
 /**
  * This function is used to define what fields are going to
  * be selected when fetching post data.
  * @param {object} req the request object from express.
- * @returns
+ * @returns the object for selecting the data
  */
 export function selectJoinedPostData(req) {
     return {
@@ -59,4 +60,28 @@ export function processFetchedJoinedPostData(post) {
     delete post._count;
 
     return post;
+}
+
+export async function friendsOf(user) {
+    return (
+        await prisma.friendship.findMany({
+            where: {
+                requestedById: user.id,
+                acceptedAt: { not: null },
+            },
+            select: { requestedById: true, acceptedById: true },
+        })
+    )
+        .map((friendship) => friendship.acceptedById)
+        .concat(
+            (
+                await prisma.friendship.findMany({
+                    where: {
+                        acceptedById: user.id,
+                        acceptedAt: { not: null },
+                    },
+                    select: { requestedById: true, acceptedById: true },
+                })
+            ).map((friendship) => friendship.requestedById)
+        );
 }

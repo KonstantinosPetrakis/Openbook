@@ -15,6 +15,7 @@ import {
 import prisma, {
     selectJoinedPostData,
     processFetchedJoinedPostData,
+    friendsOf,
 } from "../db.js";
 
 const upload = multer();
@@ -85,24 +86,6 @@ router.patch(
         return res.sendStatus(200);
     }
 );
-
-router.get("/posts/:id", validator.isValidUser(), async (req, res) => {
-    const page = Number(req.query.page || 1);
-    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
-
-    const posts = await prisma.post.findMany({
-        where: { authorId: req.extraUser.id },
-        skip: (page - 1) * resultsPerPage,
-        take: resultsPerPage,
-        orderBy: { postedAt: "desc" },
-        ...selectJoinedPostData(req),
-    });
-
-    for (let i = 0; i < posts.length; i++)
-        posts[i] = processFetchedJoinedPostData(posts[i]);
-
-    return res.json(posts);
-});
 
 router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
     const friendEntity = await prisma.friendship.findFirst({
@@ -189,20 +172,7 @@ router.delete(
 );
 
 router.get("/friends", async (req, res) => {
-    const friends = await prisma.friendship.findMany({
-        where: {
-            OR: [{ requestedById: req.user.id }, { acceptedById: req.user.id }],
-            acceptedAt: { not: null },
-        },
-    });
-
-    const friendIds = friends.map((friendship) =>
-        friendship.requestedById === req.user.id
-            ? friendship.acceptedById
-            : friendship.requestedById
-    );
-
-    return res.json({ friends: friendIds });
+    return res.json({ friends: await friendsOf(req.user) });
 });
 
 router.get("/friendRequests", async (req, res) => {
@@ -223,7 +193,7 @@ router.get("/friendRequests", async (req, res) => {
 router.get("/:id", validator.isValidUser(), async (req, res) => {
     return res.json(
         formatFileFields(
-            excludeFieldsFromObject(req.query.user, ["password"]),
+            excludeFieldsFromObject(req.extraUser, ["password"]),
             ["profileImage", "backgroundImage"]
         )
     );
