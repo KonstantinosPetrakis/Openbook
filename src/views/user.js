@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import { matchedData } from "express-validator";
+import { NotificationType } from "@prisma/client";
 
 import * as validator from "../validators/user.js";
 import {
@@ -17,6 +18,7 @@ import prisma, {
     processFetchedJoinedPostData,
     friendsOf,
 } from "../db.js";
+import { createNotification } from "./notification.js";
 
 const upload = multer();
 const router = express.Router();
@@ -111,6 +113,11 @@ router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
                 acceptedById: req.extraUser.id,
             },
         });
+        await createNotification(
+            req.extraUser.id,
+            NotificationType.FRIEND_REQUEST,
+            { userId: req.user.id }
+        );
         return res.sendStatus(201);
     }
 
@@ -131,6 +138,11 @@ router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
             },
             data: { acceptedAt: new Date() },
         });
+        await createNotification(
+            req.extraUser.id,
+            NotificationType.FRIEND_REQUEST_ACCEPTED,
+            { userId: req.user.id }
+        );
         return res.sendStatus(200);
     }
 });
@@ -192,10 +204,10 @@ router.get("/friendRequests", async (req, res) => {
 
 router.get("/:id", validator.isValidUser(), async (req, res) => {
     return res.json(
-        formatFileFields(
-            excludeFieldsFromObject(req.extraUser, ["password"]),
-            ["profileImage", "backgroundImage"]
-        )
+        formatFileFields(excludeFieldsFromObject(req.extraUser, ["password"]), [
+            "profileImage",
+            "backgroundImage",
+        ])
     );
 });
 

@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import { NotificationType } from "@prisma/client";
 import express from "express";
 import { matchedData } from "express-validator";
 import multer from "multer";
@@ -15,6 +16,7 @@ import prisma, {
     processFetchedJoinedPostData,
     friendsOf,
 } from "../db.js";
+import { createNotification } from "./notification.js";
 
 const upload = multer();
 const router = express.Router();
@@ -45,6 +47,15 @@ router.post(
             }),
         });
 
+        const friends = await friendsOf(req.user);
+        friends.forEach((friendId) => {
+            createNotification(friendId, NotificationType.FRIEND_POSTED, {
+                postId: post.id,
+                userId: req.user.id,
+                userFirstName: req.user.firstName,
+                userLastName: req.user.lastName,
+            });
+        });
         return res.status(201).json({ id: post.id });
     }
 );
@@ -83,6 +94,12 @@ router.post("/like/:id", async (req, res) => {
         return res.sendStatus(200);
     } else {
         await prisma.postLike.create({ data: likeData });
+        await createNotification(post.authorId, NotificationType.POST_LIKED, {
+            postId: req.params.id,
+            userId: req.user.id,
+            userFirstName: req.user.firstName,
+            userLastName: req.user.lastName,
+        });
         return res.sendStatus(201);
     }
 });
@@ -110,6 +127,12 @@ router.post(
         }
 
         const comment = await prisma.postComment.create({ data: commentData });
+        await createNotification(req.post.authorId, NotificationType.POST_COMMENTED, {
+            postId: req.params.id,
+            userId: req.user.id,
+            userFirstName: req.user.firstName,
+            userLastName: req.user.lastName,
+        });
         return res.status(201).json({ id: comment.id });
     }
 );

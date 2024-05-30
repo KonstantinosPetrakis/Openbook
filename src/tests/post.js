@@ -10,7 +10,7 @@ import { addFriend } from "./friends.js";
 
 import { createUsers } from "./user.js";
 
-async function createPost(token, content) {
+export async function createPost(token, content) {
     const response = await authFetch(`${URL}/post`, token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -20,7 +20,7 @@ async function createPost(token, content) {
     return response.ok ? (await response.json()).id : undefined;
 }
 
-async function deletePost(token, id) {
+export async function deletePost(token, id) {
     return (
         await authFetch(`${URL}/post/${id}`, token, {
             method: "DELETE",
@@ -28,17 +28,17 @@ async function deletePost(token, id) {
     ).status;
 }
 
-async function getPost(token, id) {
+export async function getPost(token, id) {
     const response = await authFetch(`${URL}/post/${id}`, token);
     return response.ok ? await response.json() : undefined;
 }
 
-async function getPostsOfUser(token, id) {
+export async function getPostsOfUser(token, id) {
     const response = await authFetch(`${URL}/post/ofUser/${id}`, token);
     return response.ok ? await response.json() : undefined;
 }
 
-async function likePost(token, id) {
+export async function likePost(token, id) {
     return (
         await authFetch(`${URL}/post/like/${id}`, token, {
             method: "POST",
@@ -46,7 +46,7 @@ async function likePost(token, id) {
     ).status;
 }
 
-async function createComment(token, postId, content) {
+export async function createComment(token, postId, content) {
     const response = await authFetch(`${URL}/post/comment/${postId}`, token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,7 +56,7 @@ async function createComment(token, postId, content) {
     return response.ok ? (await response.json()).id : undefined;
 }
 
-async function deleteComment(token, id) {
+export async function deleteComment(token, id) {
     return (
         await authFetch(`${URL}/post/comment/${id}`, token, {
             method: "DELETE",
@@ -64,12 +64,12 @@ async function deleteComment(token, id) {
     ).status;
 }
 
-async function getComments(token, id) {
+export async function getComments(token, id) {
     const response = await authFetch(`${URL}/post/${id}/comments`, token);
     return await response.json();
 }
 
-async function getFeed(token) {
+export async function getFeed(token) {
     const response = await authFetch(`${URL}/post/feed`, token);
     return await response.json();
 }

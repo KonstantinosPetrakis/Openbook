@@ -26,9 +26,9 @@ enum RelationshipStatus {
 enum NotificationType {
     FRIEND_REQUEST
     FRIEND_REQUEST_ACCEPTED
+    FRIEND_POSTED
     POST_LIKED
     POST_COMMENTED
-    MESSAGE_RECIEVED
 }
 
 model User {
@@ -112,7 +112,7 @@ model Notification {
     id          String           @id @default(cuid())
     createdAt   DateTime         @default(now())
     type        NotificationType
-    content     String
+    data        Json?
     recipient   User             @relation("notifications", fields: [recipientId], references: [id])
     recipientId String
 }
