@@ -1,25 +1,25 @@
 import { URL, authFetch, assertEqual } from "./helpers.js";
 import { createUsers } from "./user.js";
 
-async function addFriend(token, id) {
+export async function addFriend(token, id) {
     const response = await authFetch(`${URL}/user/addFriend/${id}`, token, {
         method: "POST",
     });
     return response.status;
 }
 
-async function getFriendRequests(token) {
+export async function getFriendRequests(token) {
     const response = await authFetch(`${URL}/user/friendRequests`, token);
 
     return (await response.json()).friendRequests;
 }
 
-async function getFriends(token) {
+export async function getFriends(token) {
     const response = await authFetch(`${URL}/user/friends`, token);
     return (await response.json()).friends;
 }
 
-async function deleteFriend(token, id) {
+export async function deleteFriend(token, id) {
     const response = await authFetch(`${URL}/user/deleteFriend/${id}`, token, {
         method: "DELETE",
     });

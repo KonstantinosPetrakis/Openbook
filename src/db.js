@@ -20,6 +20,7 @@ export function selectJoinedPostData(req) {
             _count: {
                 select: {
                     likes: true,
+                    comments: true,
                 },
             },
             author: {
@@ -57,6 +58,7 @@ export function processFetchedJoinedPostData(post) {
 
     post.liked = post.likes.length > 0;
     post.likes = post._count.likes;
+    post.comments = post._count.comments;
     delete post._count;
 
     return post;

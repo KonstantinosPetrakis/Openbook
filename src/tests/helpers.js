@@ -3,6 +3,11 @@ export const USER_PASSWORD = "password";
 export const USERS_TO_CREATE = 10;
 const VERBOSE = false;
 
+
+export async function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function authFetch(url, token, options) {
     return await fetch(url, {
         ...options,

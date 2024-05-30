@@ -13,6 +13,7 @@ import {
 import prisma, {
     selectJoinedPostData,
     processFetchedJoinedPostData,
+    friendsOf,
 } from "../db.js";
 
 const upload = multer();
@@ -59,15 +60,6 @@ router.delete("/:id", validator.postExists, async (req, res) => {
     await prisma.postFile.deleteMany({ where: { postId: req.params.id } });
     await prisma.post.delete({ where: { id: req.params.id } });
     return res.sendStatus(200);
-});
-
-router.get("/:id", validator.postExists, async (req, res) => {
-    let post = await prisma.post.findUnique({
-        where: { id: req.params.id },
-        ...selectJoinedPostData(req),
-    });
-
-    return res.json(processFetchedJoinedPostData(post));
 });
 
 router.post("/like/:id", async (req, res) => {
@@ -149,8 +141,8 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
 router.get("/feed", async (req, res) => {
     const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
     return res.json(
-        processFetchedJoinedPostData(
-            await prisma.post.findMany({
+        (
+            (await prisma.post.findMany({
                 where: {
                     authorId: { in: await friendsOf(req.user) },
                 },
@@ -158,10 +150,10 @@ router.get("/feed", async (req, res) => {
                     postedAt: "desc",
                 },
                 ...selectJoinedPostData(req),
-                skip: ((request.query.page || 0) - 1) * resultsPerPage,
+                skip: ((req.query.page || 1) - 1) * resultsPerPage,
                 take: resultsPerPage,
-            })
-        )
+            })) || []
+        ).map((p) => processFetchedJoinedPostData(p))
     );
 });
 
@@ -169,18 +161,26 @@ router.get("/ofUser/:id", isValidUser(), async (req, res) => {
     const page = Number(req.query.page || 1);
     const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
 
-    const posts = await prisma.post.findMany({
-        where: { authorId: req.extraUser.id },
-        skip: (page - 1) * resultsPerPage,
-        take: resultsPerPage,
-        orderBy: { postedAt: "desc" },
+    return res.json(
+        (
+            (await prisma.post.findMany({
+                where: { authorId: req.params.id },
+                orderBy: { postedAt: "desc" },
+                ...selectJoinedPostData(req),
+                skip: (page - 1) * resultsPerPage,
+                take: resultsPerPage,
+            })) || []
+        ).map((p) => processFetchedJoinedPostData(p))
+    );
+});
+
+router.get("/:id", validator.postExists, async (req, res) => {
+    let post = await prisma.post.findUnique({
+        where: { id: req.params.id },
         ...selectJoinedPostData(req),
     });
 
-    for (let i = 0; i < posts.length; i++)
-        posts[i] = processFetchedJoinedPostData(posts[i]);
-
-    return res.json(posts);
+    return res.json(processFetchedJoinedPostData(post));
 });
 
 export default router;
