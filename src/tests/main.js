@@ -3,6 +3,9 @@ import { main as user } from "./user.js";
 import { main as friends } from "./friends.js"
 import { main as notification } from "./notification.js";
 
+/**
+ * This function runs all the tests.
+ */
 async function main() {
     await user();
     console.log("✅ User test passed");

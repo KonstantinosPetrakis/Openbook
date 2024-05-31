@@ -3,11 +3,19 @@ import { createUsers } from "./user.js";
 import { addFriend } from "./friends.js";
 import { createPost, createComment, likePost } from "./post.js";
 
+/**
+ * This function returns the notifications of the user (paginated).
+ * @param {string} token the token of the user.
+ * @returns {Promise<Array>} the notifications of the user.
+ */
 async function getNotifications(token) {
     const response = await authFetch(`${URL}/notification`, token);
     return response.ok ? await response.json() : [];
 }
 
+/**
+ * This function tests the notification system.
+ */
 export async function main() {
     const { userIds, tokens } = await createUsers();
 

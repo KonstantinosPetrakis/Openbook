@@ -10,6 +10,12 @@ import { addFriend } from "./friends.js";
 
 import { createUsers } from "./user.js";
 
+/**
+ * This function creates a post with the given content.
+ * @param {string} token the token of the user. 
+ * @param {string} content the content of the post.
+ * @returns {Promise<string | undefined>} the id of the post or undefined if the request failed.
+ */
 export async function createPost(token, content) {
     const response = await authFetch(`${URL}/post`, token, {
         method: "POST",
@@ -20,6 +26,12 @@ export async function createPost(token, content) {
     return response.ok ? (await response.json()).id : undefined;
 }
 
+/**
+ * This function deletes a post with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} id the id of the post. 
+ * @returns {Promise<number>} the status code of the request.
+ */
 export async function deletePost(token, id) {
     return (
         await authFetch(`${URL}/post/${id}`, token, {
@@ -28,16 +40,34 @@ export async function deletePost(token, id) {
     ).status;
 }
 
+/**
+ * This function gets a post with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} id the id of the post. 
+ * @returns {Promise<object | undefined>} the post or undefined if the request failed.
+ */
 export async function getPost(token, id) {
     const response = await authFetch(`${URL}/post/${id}`, token);
     return response.ok ? await response.json() : undefined;
 }
 
+/**
+ * This function gets all posts of the user with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} id the id of the user. 
+ * @returns {Promise<Array | undefined>} the posts or undefined if the request failed.
+ */
 export async function getPostsOfUser(token, id) {
     const response = await authFetch(`${URL}/post/ofUser/${id}`, token);
     return response.ok ? await response.json() : undefined;
 }
 
+/**
+ * This function likes a post with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} id the id of the post. 
+ * @returns {Promise<number>} the status code of the request.
+ */
 export async function likePost(token, id) {
     return (
         await authFetch(`${URL}/post/like/${id}`, token, {
@@ -46,6 +76,13 @@ export async function likePost(token, id) {
     ).status;
 }
 
+/**
+ * This function creates a comment with the given content on the post with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} postId the id of the post.
+ * @param {string} content the content of the comment. 
+ * @returns {Promise<string | undefined>} the id of the comment or undefined if the request failed.
+ */
 export async function createComment(token, postId, content) {
     const response = await authFetch(`${URL}/post/comment/${postId}`, token, {
         method: "POST",
@@ -56,6 +93,12 @@ export async function createComment(token, postId, content) {
     return response.ok ? (await response.json()).id : undefined;
 }
 
+/**
+ * This function deletes a comment with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} id the id of the comment. 
+ * @returns {Promise<number>} the status code of the request.
+ */
 export async function deleteComment(token, id) {
     return (
         await authFetch(`${URL}/post/comment/${id}`, token, {
@@ -64,16 +107,30 @@ export async function deleteComment(token, id) {
     ).status;
 }
 
+/**
+ * This function gets all comments (paginated) of the post with the given id.
+ * @param {string} token the token of the user. 
+ * @param {string} id the id of the post.
+ * @returns {Promise<Array | undefined>} the comments or undefined if the request failed.
+ */
 export async function getComments(token, id) {
     const response = await authFetch(`${URL}/post/${id}/comments`, token);
-    return await response.json();
+    return response.ok ? await response.json() : undefined;
 }
 
+/**
+ * This function gets the feed of the user.
+ * @param {string} token the token of the user. 
+ * @returns {Promise<Array | undefined>} the feed of the user or undefined if the request failed.
+ */
 export async function getFeed(token) {
     const response = await authFetch(`${URL}/post/feed`, token);
-    return await response.json();
+    return response.ok ? await response.json() : undefined;
 }
 
+/**
+ * This function tests the post functionality.
+ */
 export async function main() {
     const { userIds, tokens } = await createUsers();
 

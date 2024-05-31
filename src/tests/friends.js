@@ -1,6 +1,13 @@
 import { URL, authFetch, assertEqual } from "./helpers.js";
 import { createUsers } from "./user.js";
 
+/**
+ * This function sends a friend request to a user.
+ * It's also used to accept a friend request.
+ * @param {string} token the token to authenticate with.
+ * @param {string} id the id of the user to send a friend request to or accept a friend request from.
+ * @returns {Promise<number>} the status code of the request.
+ */
 export async function addFriend(token, id) {
     const response = await authFetch(`${URL}/user/addFriend/${id}`, token, {
         method: "POST",
@@ -8,17 +15,32 @@ export async function addFriend(token, id) {
     return response.status;
 }
 
+/**
+ * This function gets the friend requests of the authenticated user.
+ * @param {string} token the token to authenticate with.
+ * @returns {Promise<string[]>} the friend requests of the user.
+ */
 export async function getFriendRequests(token) {
     const response = await authFetch(`${URL}/user/friendRequests`, token);
-
-    return (await response.json()).friendRequests;
+    return response.ok ? (await response.json()).friendRequests : [];
 }
 
+/**
+ * This function gets the friends of the authenticated user.
+ * @param {string} token the token to authenticate with.
+ * @returns {Promise<string[]>} the friends of the user.
+ */
 export async function getFriends(token) {
     const response = await authFetch(`${URL}/user/friends`, token);
     return (await response.json()).friends;
 }
 
+/**
+ * This function deletes a friend from the authenticated user.
+ * @param {string} token the token to authenticate with.
+ * @param {string} id the id of the friend to delete.
+ * @returns {Promise<number>} the status code of the request.
+ */
 export async function deleteFriend(token, id) {
     const response = await authFetch(`${URL}/user/deleteFriend/${id}`, token, {
         method: "DELETE",
@@ -27,6 +49,9 @@ export async function deleteFriend(token, id) {
     return response.status;
 }
 
+/**
+ * This function tests the friends functionality.
+ */
 export async function main() {
     const { tokens, userIds } = await createUsers();
 

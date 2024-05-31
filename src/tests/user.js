@@ -8,6 +8,14 @@ import {
     USERS_TO_CREATE,
 } from "./helpers.js";
 
+/**
+ * This function creates a user with the given email, password, first name and last name.
+ * @param {string} email the email of the user.
+ * @param {string} password the password of the user.
+ * @param {string} firstName the first name of the user.
+ * @param {string} lastName the last name of the user.
+ * @returns {Promise<string | undefined>} the id of the user or undefined if the request failed.
+ */
 async function createUser(email, password, firstName, lastName) {
     const response = await fetch(`${URL}/user/register`, {
         method: "POST",
@@ -15,9 +23,15 @@ async function createUser(email, password, firstName, lastName) {
         body: JSON.stringify({ email, password, firstName, lastName }),
     });
 
-    return (await response.json()).id;
+    return response.ok ? (await response.json()).id : undefined;
 }
 
+/**
+ * This function logs in a user with the given email and password.
+ * @param {string} email the email of the user.
+ * @param {string} password the password of the user.
+ * @return {Promise<string | undefined>} the token of the user or undefined if the request failed.
+ */
 async function loginUser(email, password) {
     const response = await fetch(`${URL}/user/login`, {
         method: "POST",
@@ -25,9 +39,15 @@ async function loginUser(email, password) {
         body: JSON.stringify({ email, password }),
     });
 
-    return (await response.json()).token;
+    return response.ok ? (await response.json()).token : undefined;
 }
 
+/**
+ * This function updates a user with the given token and fields.
+ * @param {string} token the token of the user.
+ * @param {object} fields a map of fields to update.
+ * @returns {Promise<boolean>} whether the request was successful.
+ */
 async function updateUser(token, fields) {
     const response = await authFetch(`${URL}/user`, token, {
         method: "PATCH",
@@ -38,11 +58,24 @@ async function updateUser(token, fields) {
     return response.ok;
 }
 
+/**
+ * This function gets a user (its profile expect posts)
+ * with the given token and id.
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the user.
+ * @returns {Promise<object | undefined>} the user or undefined if the request failed.
+ */
 async function getUser(token, id) {
     const response = await authFetch(`${URL}/user/${id}`, token);
-    return await response.json();
+    return response.ok ? await response.json() : undefined;
 }
 
+/**
+ * This function creates users and returns their ids and tokens
+ * based on constants set on `tests/users.js`.
+ * @returns { Promise<{userIds: Array<string>, tokens: Array<string>> } }
+ * the ids and tokens of the users.
+ */
 export async function createUsers() {
     const userIds = [];
     const tokens = [];
@@ -55,6 +88,9 @@ export async function createUsers() {
     return { userIds, tokens };
 }
 
+/**
+ * This function tests the user endpoints.
+ */
 export async function main() {
     const { userIds, tokens } = await createUsers();
 
