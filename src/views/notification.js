@@ -1,17 +1,20 @@
 import express from "express";
 
+import { updateUserForNewNotification } from "../socket.js";
 import prisma from "../db.js";
 
 const router = express.Router();
 
 export async function createNotification(recipientId, type, data) {
-    return await prisma.notification.create({
+    const notification = await prisma.notification.create({
         data: {
             recipientId,
             type,
             data,
         },
     });
+    updateUserForNewNotification(recipientId);
+    return notification;
 }
 
 router.get("/", async (req, res) => {

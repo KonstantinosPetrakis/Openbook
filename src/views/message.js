@@ -4,6 +4,7 @@ import express from "express";
 import { matchedData } from "express-validator";
 
 import * as validator from "../validators/message.js";
+import { updateUserForNewMessage } from "../socket.js";
 import prisma from "../db.js";
 import {
     excludeFieldsFromObject,
@@ -40,6 +41,7 @@ router.post("/", validator.messageValidator, async (req, res) => {
     }
 
     await prisma.message.create({ data: messageData });
+    updateUserForNewMessage(messageData.recipientId);
     return res.sendStatus(201);
 });
 

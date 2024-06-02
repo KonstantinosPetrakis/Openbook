@@ -7,12 +7,11 @@ import {
 } from "./helpers.js";
 
 import { addFriend } from "./friends.js";
-
 import { createUsers } from "./user.js";
 
 /**
  * This function creates a post with the given content.
- * @param {string} token the token of the user. 
+ * @param {string} token the token of the user.
  * @param {string} content the content of the post.
  * @returns {Promise<string | undefined>} the id of the post or undefined if the request failed.
  */
@@ -28,8 +27,8 @@ export async function createPost(token, content) {
 
 /**
  * This function deletes a post with the given id.
- * @param {string} token the token of the user. 
- * @param {string} id the id of the post. 
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the post.
  * @returns {Promise<number>} the status code of the request.
  */
 export async function deletePost(token, id) {
@@ -42,8 +41,8 @@ export async function deletePost(token, id) {
 
 /**
  * This function gets a post with the given id.
- * @param {string} token the token of the user. 
- * @param {string} id the id of the post. 
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the post.
  * @returns {Promise<object | undefined>} the post or undefined if the request failed.
  */
 export async function getPost(token, id) {
@@ -53,8 +52,8 @@ export async function getPost(token, id) {
 
 /**
  * This function gets all posts of the user with the given id.
- * @param {string} token the token of the user. 
- * @param {string} id the id of the user. 
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the user.
  * @returns {Promise<Array | undefined>} the posts or undefined if the request failed.
  */
 export async function getPostsOfUser(token, id) {
@@ -64,8 +63,8 @@ export async function getPostsOfUser(token, id) {
 
 /**
  * This function likes a post with the given id.
- * @param {string} token the token of the user. 
- * @param {string} id the id of the post. 
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the post.
  * @returns {Promise<number>} the status code of the request.
  */
 export async function likePost(token, id) {
@@ -78,9 +77,9 @@ export async function likePost(token, id) {
 
 /**
  * This function creates a comment with the given content on the post with the given id.
- * @param {string} token the token of the user. 
+ * @param {string} token the token of the user.
  * @param {string} postId the id of the post.
- * @param {string} content the content of the comment. 
+ * @param {string} content the content of the comment.
  * @returns {Promise<string | undefined>} the id of the comment or undefined if the request failed.
  */
 export async function createComment(token, postId, content) {
@@ -95,8 +94,8 @@ export async function createComment(token, postId, content) {
 
 /**
  * This function deletes a comment with the given id.
- * @param {string} token the token of the user. 
- * @param {string} id the id of the comment. 
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the comment.
  * @returns {Promise<number>} the status code of the request.
  */
 export async function deleteComment(token, id) {
@@ -109,7 +108,7 @@ export async function deleteComment(token, id) {
 
 /**
  * This function gets all comments (paginated) of the post with the given id.
- * @param {string} token the token of the user. 
+ * @param {string} token the token of the user.
  * @param {string} id the id of the post.
  * @returns {Promise<Array | undefined>} the comments or undefined if the request failed.
  */
@@ -120,7 +119,7 @@ export async function getComments(token, id) {
 
 /**
  * This function gets the feed of the user.
- * @param {string} token the token of the user. 
+ * @param {string} token the token of the user.
  * @returns {Promise<Array | undefined>} the feed of the user or undefined if the request failed.
  */
 export async function getFeed(token) {
