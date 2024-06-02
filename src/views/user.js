@@ -1,7 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import multer from "multer";
 import { matchedData } from "express-validator";
 import { NotificationType } from "@prisma/client";
 
@@ -13,14 +12,9 @@ import {
     formatFileFields,
     updateModelFile,
 } from "../helpers.js";
-import prisma, {
-    selectJoinedPostData,
-    processFetchedJoinedPostData,
-    friendsOf,
-} from "../db.js";
+import prisma, { friendsOf } from "../db.js";
 import { createNotification } from "./notification.js";
 
-const upload = multer();
 const router = express.Router();
 
 router.post("/register", validator.userRegister, async (req, res) => {
@@ -59,35 +53,25 @@ router.post("/login", validator.loginValidator, async (req, res) => {
     });
 });
 
-router.patch(
-    "/",
-    upload.fields([
-        { name: "profileImage", maxCount: 1 },
-        { name: "backgroundImage", maxCount: 1 },
-    ]),
-    validator.userUpdate,
-    async (req, res) => {
-        const valuesToUpdate = excludeUndefinedFieldsFromObject(
-            matchedData(req)
+router.patch("/", validator.userUpdate, async (req, res) => {
+    const valuesToUpdate = excludeUndefinedFieldsFromObject(matchedData(req));
+
+    for (const attribute of ["profileImage", "backgroundImage"]) {
+        valuesToUpdate[attribute] = updateModelFile(
+            req.user,
+            checkNamedFileOutOfMany(req, attribute),
+            attribute,
+            (model, extension) => `${attribute}_${model.id}.${extension}`
         );
-
-        for (const attribute of ["profileImage", "backgroundImage"]) {
-            valuesToUpdate[attribute] = updateModelFile(
-                req.user,
-                checkNamedFileOutOfMany(req, attribute),
-                attribute,
-                (model, extension) => `${attribute}_${model.id}.${extension}`
-            );
-        }
-
-        await prisma.user.update({
-            where: { id: req.user.id },
-            data: valuesToUpdate,
-        });
-
-        return res.sendStatus(200);
     }
-);
+
+    await prisma.user.update({
+        where: { id: req.user.id },
+        data: valuesToUpdate,
+    });
+
+    return res.sendStatus(200);
+});
 
 router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
     const friendEntity = await prisma.friendship.findFirst({

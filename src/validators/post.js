@@ -2,16 +2,19 @@ import { body } from "express-validator";
 import { returnValidationError } from "./helpers.js";
 
 import prisma from "../db.js";
-
+import {
+    multerImageVideoUploader as upload,
+    multerErrorHandler,
+} from "../helpers.js";
 
 /**
  * This is a middleware function that checks if a post exists based
  * on the id provided in the query parameters. If the post exists,
  * the post object is attached to the request object. Otherwise, a 404
  * status is sent back to the client.
- * @param {object} req the request object from express. 
- * @param {object} res the response object from express. 
- * @param {Function} next the next function to call in the middleware chain. 
+ * @param {object} req the request object from express.
+ * @param {object} res the response object from express.
+ * @param {Function} next the next function to call in the middleware chain.
  */
 export async function postExists(req, res, next) {
     const post = await prisma.post.findUnique({
@@ -28,9 +31,9 @@ export async function postExists(req, res, next) {
  * on the id provided in the query parameters. If the comment exists,
  * the comment object is attached to the request object. Otherwise, a 404
  * status is sent back to the client.
- * @param {object} req the request object from express. 
- * @param {object} res the response object from express. 
- * @param {Function} next the next function to call in the middleware chain. 
+ * @param {object} req the request object from express.
+ * @param {object} res the response object from express.
+ * @param {Function} next the next function to call in the middleware chain.
  */
 export async function commentExists(req, res, next) {
     const comment = await prisma.postComment.findUnique({
@@ -42,9 +45,16 @@ export async function commentExists(req, res, next) {
     next();
 }
 
-export const postCreate = [body("content").escape(), returnValidationError];
+export const postCreate = [
+    upload.fields([{ name: "files", maxCount: 20 }]),
+    multerErrorHandler,
+    body("content").escape(),
+    returnValidationError,
+];
 
 export const commentCreate = [
+    upload.single("file"),
+    multerErrorHandler,
     postExists,
     body("content").escape(),
     returnValidationError,

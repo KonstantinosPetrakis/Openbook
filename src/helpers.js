@@ -1,4 +1,40 @@
 import fs from "fs/promises";
+import jwt from "jsonwebtoken";
+import multer from "multer";
+
+import {
+    IMAGE_MIME_TYPES,
+    VIDEO_MIME_TYPES,
+    MAX_FILE_SIZE,
+    multerFileFilter,
+} from "./validators/helpers.js";
+
+
+export const multerImageUploader = multer({
+    fileFilter: multerFileFilter(IMAGE_MIME_TYPES),
+    limits: { fileSize: MAX_FILE_SIZE },
+});
+
+export const multerImageVideoUploader = multer({
+    fileFilter: multerFileFilter([...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES]),
+    limits: { fileSize: MAX_FILE_SIZE },
+});
+
+
+/**
+ * This function is an error middleware to handle multer errors.
+ * @param {object} err
+ * @param {object} req 
+ * @param {object} res 
+ * @param {Function} next 
+ */
+export function multerErrorHandler(err, req, res, next) {
+    if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") return res.sendStatus(413);
+        return res.sendStatus(400);
+    }
+    return next(err);
+} 
 
 /**
  * This function creates the storage directories if they do not exist.
@@ -21,12 +57,33 @@ export function getPublicFileDirectory(fileName) {
 }
 
 /**
+ * This function is used to get the path in the file system of a private file.
+ * @param {string} fileName the name of the file.
+ */
+export function getPrivateFileDirectory(fileName) {
+    return `storage/private/${fileName}`;
+}
+
+/**
  * This function is used to get the public URL of a file.
  * @param {string} fileName the name of the file.
  * @returns {string} the public path of the file.
  */
 export function getPublicFileURL(fileName) {
     return `/public/${fileName}`;
+}
+
+/**
+ * This function is used to get a public URL for a private file,
+ * which can be accessed for a limited time.
+ * @param {string} fileName the name of the file.
+ * @returns {string} the public path of the file.
+ */
+export function getPrivateFileURL(fileName) {
+    const token = jwt.sign({ fileName }, process.env.SECRET_KEY || "", {
+        expiresIn: "1m",
+    });
+    return `/private/${token}`;
 }
 
 /**
@@ -49,29 +106,6 @@ export function checkNamedFileOutOfMany(req, fileName, fileType = "image") {
     // Most likely the client will send a null or empty string as the value of the image.
     else if (req.body && req.body[fileName] !== undefined) return null;
     return undefined;
-}
-
-/**
- * This function is used to check if files are uploaded among others
- * (different file-fields in the same form) and handled by multer.
- * @param {object} req Request object from express
- * @param {string} fileName Name of the file array to check
- * @param {Array<string>} fileType Types of the file to check for, default is images and videos.
- * @returns {Array<object>} the file objects that are present.
- */
-export function checkNamedFilesOutOfMany(
-    req,
-    fileName,
-    fileType = ["image", "video"]
-) {
-    const files = [];
-
-    if (req.files && req.files[fileName])
-        req.files[fileName].forEach((file) => {
-            if (fileType.some((type) => file.mimetype.startsWith(type)))
-                files.push(file);
-        });
-    return files;
 }
 
 /**
@@ -127,12 +161,13 @@ export function excludeUndefinedFieldsFromObject(obj) {
  * This function is used to format image fields in an object.
  * @param {object} object the object that contains the image fields.
  * @param {array<string>} fields the image fields to format.
+ * @param {boolean} priv whether the image fields are private or not.
  * @returns {object} the object with the formatted image fields.
  */
-export function formatFileFields(object, fields) {
+export function formatFileFields(object, fields, priv = false) {
     const newObj = { ...object };
-    fields.forEach((field) => {
-        if (newObj[field]) newObj[field] = getPublicFileURL(newObj[field]);
-    });
+    const getURL = priv ? getPrivateFileURL : getPublicFileURL;
+    for (const field of fields)
+        newObj[field] = newObj[field] ? getURL(newObj[field]) : null;
     return newObj;
 }

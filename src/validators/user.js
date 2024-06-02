@@ -1,27 +1,30 @@
 import { Gender, RelationshipStatus } from "@prisma/client";
 import { body } from "express-validator";
 
+import {
+    multerImageUploader as upload,
+    multerErrorHandler,
+} from "../helpers.js";
 import { escapeUndefined, isEnum, returnValidationError } from "./helpers.js";
 import prisma from "../db.js";
-
 
 /**
  * This function is a middleware that checks if the user exists in the database
  * based on the user id in the request.
- * @param {"params" | "body"} position where the user id is located 
+ * @param {"params" | "body"} position where the user id is located
  * @returns a middleware function that checks if the user exists in the database.
  */
-export function isValidUser(position="params") {
+export function isValidUser(position = "params") {
     return async (req, res, next) => {
         const user = await prisma.user.findUnique({
             where: { id: req[position].id },
         });
-    
+
         if (!user) return res.sendStatus(404);
-    
+
         req.extraUser = user;
         next();
-    }
+    };
 }
 
 export const userRegister = [
@@ -41,6 +44,11 @@ export const loginValidator = [
 ];
 
 export const userUpdate = [
+    upload.fields([
+        { name: "profileImage", maxCount: 1 },
+        { name: "backgroundImage", maxCount: 1 },
+    ]),
+    multerErrorHandler,
     body("email")
         .customSanitizer((v) => escapeUndefined(v))
         .optional()

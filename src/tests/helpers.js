@@ -31,6 +31,16 @@ export async function authFetch(url, token, options) {
 }
 
 /**
+ * This function fetches a public file from the server.
+ * @param {string} relativeURL the relative URL of the file (e.g /private/token)
+ * @param {string} token the access token for the user.
+ * @returns {Promise<Response>} a promise that resolves with the response from the fetch.
+ */
+export async function getPrivateFile(relativeURL, token) {
+    return await authFetch(`${URL}${relativeURL}`, token);
+}
+
+/**
  * This function checks if 2 objects are equal.
  * If they are not equal, the function will print an error message and exit the process.
  * @param {object} actual the actual object.
@@ -57,6 +67,16 @@ export function assertCallable(actual, callback) {
         console.error(`❌ ${actual} failed callback`);
         process.exit(1);
     }
+}
+
+/**
+ * This function returns a random file blob.
+ * @param {number} size the size of the file in megabytes.
+ * @param {string} mimeType the mime type of the file (default is image/png).
+ * @returns {Promise<Blob>} a promise that resolves with a random image blob.
+ */
+export async function randomFileBlob(size, mimeType = "image/png") {
+    return new Blob([new ArrayBuffer(size * 10 ** 6)], { type: mimeType });
 }
 
 /**
