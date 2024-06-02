@@ -34,6 +34,11 @@ export async function getMessageWithFriend(token, id) {
     return response.ok ? await response.json() : undefined;
 }
 
+export async function getChats(token) {
+    const response = await authFetch(`${URL}/message/chats`, token);
+    return response.ok ? await response.json() : undefined;
+}
+
 export async function main() {
     const { userIds, tokens } = await createUsers();
 
@@ -83,5 +88,35 @@ export async function main() {
             await randomFileBlob(1, "application/pdf")
         ),
         400
+    );
+
+    // Test chats by sending 3 messages to user2 from each user3, user4 and user5
+    // Also make the user2 send a message to user6 and reply to only user3.
+
+    for (let i = 3; i < 6; i++) {
+        await addFriend(tokens[2], userIds[i]);
+        await addFriend(tokens[i], userIds[2]);
+        for (let j = 0; j < 3; j++)
+            await sendMessage(tokens[i], userIds[2], `Message ${j + 1}`);
+    }
+
+    await addFriend(tokens[2], userIds[6]);
+    await addFriend(tokens[6], userIds[2]);
+    await sendMessage(tokens[2], userIds[6], "Message 1");
+
+    await getMessageWithFriend(tokens[2], userIds[3]);
+    await sendMessage(tokens[2], userIds[3], "Response to Message 1,2,3");
+
+    assertCallable(
+        await getChats(tokens[2]),
+        (messages) =>
+            messages[0].id === userIds[3] &&
+            messages[1].id === userIds[6] &&
+            messages[2].id == userIds[5] &&
+            messages[3].id == userIds[4] &&
+            messages[0].attention == false &&
+            messages[1].attention == false &&
+            messages[2].attention == true &&
+            messages[3].attention == true
     );
 }

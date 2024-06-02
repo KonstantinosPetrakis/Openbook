@@ -32,4 +32,20 @@ router.get("/", async (req, res) => {
     );
 });
 
+router.patch("/read/:id", async (req, res) => {
+    try {
+        await prisma.notification.update({
+            where: {
+                id: req.params.id,
+            },
+            data: {
+                read: true,
+            },
+        });
+        return res.sendStatus(200);
+    } catch (error) {
+        return res.sendStatus(404);
+    }
+});
+
 export default router;

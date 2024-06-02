@@ -1,4 +1,4 @@
-import { URL, authFetch, assertCallable } from "./helpers.js";
+import { URL, authFetch, assertCallable, assertEqual } from "./helpers.js";
 import { createUsers } from "./user.js";
 import { addFriend } from "./friends.js";
 import { createPost, createComment, likePost } from "./post.js";
@@ -11,6 +11,19 @@ import { createPost, createComment, likePost } from "./post.js";
 async function getNotifications(token) {
     const response = await authFetch(`${URL}/notification`, token);
     return response.ok ? await response.json() : [];
+}
+
+/**
+ * This function marks a notification as read.
+ * @param {string} token the token of the user.
+ * @param {string} id the id of the notification. 
+ * @returns {Promise<boolean>} a promise that resolves to whether the operation was successful.
+ */
+async function readNotification(token, id) {
+    const response = await authFetch(`${URL}/notification/read/${id}`, token, {
+        method: "PATCH",
+    });
+    return response.ok;
 }
 
 /**
@@ -59,5 +72,19 @@ export async function main() {
         await getNotifications(tokens[0]),
         (notifications) =>
             notifications.length === 3 && notifications[0].type === "POST_LIKED"
+    );
+
+    // Read non-existent notification
+    assertEqual(await readNotification(tokens[0], 0), false);
+
+    // Read notification
+    const notifications = await getNotifications(tokens[0]);
+    assertEqual(await readNotification(tokens[0], notifications[0].id), true);
+    assertCallable(
+        await getNotifications(tokens[0]),
+        (notifications) =>
+            notifications[0].read &&
+            !notifications[1].read &&
+            !notifications[2].read
     );
 }

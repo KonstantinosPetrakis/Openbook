@@ -84,6 +84,7 @@ CREATE TABLE "Notification" (
     "type" "NotificationType" NOT NULL,
     "data" JSONB,
     "recipientId" TEXT NOT NULL,
+    "read" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );
@@ -96,6 +97,7 @@ CREATE TABLE "Message" (
     "recipientId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "file" TEXT,
+    "read" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );

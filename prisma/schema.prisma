@@ -115,6 +115,7 @@ model Notification {
     data        Json?
     recipient   User             @relation("notifications", fields: [recipientId], references: [id])
     recipientId String
+    read        Boolean          @default(false)
 }
 
 model Message {
@@ -126,4 +127,5 @@ model Message {
     recipientId String
     content     String
     file        String?
+    read        Boolean  @default(false)
 }
