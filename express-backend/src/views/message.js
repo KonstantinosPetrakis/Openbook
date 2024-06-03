@@ -10,6 +10,7 @@ import {
     excludeFieldsFromObject,
     formatFileFields,
     getPrivateFileDirectory,
+    paginate
 } from "../helpers.js";
 
 const router = express.Router();
@@ -46,9 +47,6 @@ router.post("/", validator.messageValidator, async (req, res) => {
 });
 
 router.get("/chats", async (req, res) => {
-    const resultsPerPage = Number(process.env["RESULTS_PER_PAGE"] || 10);
-    const page = Number(req.query.page || 1);
-
     const chats =
         (await prisma.message.findMany({
             distinct: ["senderId", "recipientId"],
@@ -58,8 +56,7 @@ router.get("/chats", async (req, res) => {
             orderBy: {
                 sentAt: "desc",
             },
-            skip: (page - 1) * resultsPerPage,
-            take: resultsPerPage,
+            ...paginate(req),
         })) || [];
 
     for (let i = 0; i < chats.length; i++) {
@@ -85,9 +82,6 @@ router.get("/chats", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    const resultsPerPage = Number(process.env["RESULTS_PER_PAGE"] || 10);
-    const page = Number(req.query.page || 1);
-
     await prisma.message.updateMany({
         where: { senderId: req.params.id, recipientId: req.user.id },
         data: { read: true },
@@ -104,8 +98,7 @@ router.get("/:id", async (req, res) => {
             orderBy: {
                 sentAt: "desc",
             },
-            skip: (page - 1) * resultsPerPage,
-            take: resultsPerPage,
+            ...paginate(req)
         })) || []
     ).map((m) => formatFileFields(m, ["file"], true));
 

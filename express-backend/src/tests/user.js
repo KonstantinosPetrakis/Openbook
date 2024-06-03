@@ -1,3 +1,5 @@
+import cuid from "cuid";
+
 import {
     assertCallable,
     assertEqual,
@@ -89,6 +91,18 @@ export async function createUsers() {
 }
 
 /**
+ * This function searches for users based on the given token and query.
+ * @param {string} token the auth token of the user.
+ * @param {string} query the search query.
+ * @returns {Promise<Array<object> | undefined>}
+ * a promise that resolves to an array of users or undefined if the request failed.
+ */
+export async function searchUser(token, query) {
+    const response = await authFetch(`${URL}/user/search/${query}`, token);
+    return response.ok ? await response.json() : undefined;
+}
+
+/**
  * This function tests the user endpoints.
  */
 export async function main() {
@@ -127,5 +141,29 @@ export async function main() {
     assertCallable(
         await getUser(tokens[0], userIds[0]),
         (u) => u.firstName == "John" && u.lastName == "Doe"
+    );
+
+    const randomPrefix = cuid();
+    const appendPrefix = (s) => `${randomPrefix}${s}`;
+    const names = ["John Doe", "Jane Doe", "Alice Box", "Bob Box"];
+    for (const name of names)
+        await createUser(
+            appendPrefix(`${name.split(" ")[0]}@example.com`),
+            "12345678",
+            appendPrefix(name.split(" ")[0]),
+            appendPrefix(name.split(" ")[1])
+        );
+
+    assertCallable(
+        await searchUser(tokens[0], appendPrefix("doe")),
+        (users) => users.length === 2
+    );
+    assertCallable(
+        await searchUser(tokens[0], appendPrefix("box")),
+        (users) => users.length === 2
+    );
+    assertCallable(
+        await searchUser(tokens[0], appendPrefix("alice")),
+        (users) => users.length === 1
     );
 }

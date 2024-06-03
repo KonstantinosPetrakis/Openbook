@@ -9,7 +9,6 @@ import {
     multerFileFilter,
 } from "./validators/helpers.js";
 
-
 export const multerImageUploader = multer({
     fileFilter: multerFileFilter(IMAGE_MIME_TYPES),
     limits: { fileSize: MAX_FILE_SIZE },
@@ -20,13 +19,27 @@ export const multerImageVideoUploader = multer({
     limits: { fileSize: MAX_FILE_SIZE },
 });
 
+/**
+ * This function paginates the results of a query.
+ * @param {object} req the request object
+ * @returns {object} an object that contains the skip and take values for db query.
+ */
+export function paginate(req) {
+    const page = Number(req.query.page || 1);
+    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
+
+    return {
+        skip: (page - 1) * resultsPerPage,
+        take: resultsPerPage,
+    };
+}
 
 /**
  * This function is an error middleware to handle multer errors.
  * @param {object} err
- * @param {object} req 
- * @param {object} res 
- * @param {Function} next 
+ * @param {object} req
+ * @param {object} res
+ * @param {Function} next
  */
 export function multerErrorHandler(err, req, res, next) {
     if (err instanceof multer.MulterError) {
@@ -34,7 +47,7 @@ export function multerErrorHandler(err, req, res, next) {
         return res.sendStatus(400);
     }
     return next(err);
-} 
+}
 
 /**
  * This function creates the storage directories if they do not exist.

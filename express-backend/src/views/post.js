@@ -6,7 +6,7 @@ import cuid from "cuid";
 
 import * as validator from "../validators/post.js";
 import { isValidUser } from "../validators/user.js";
-import { getPublicFileDirectory } from "../helpers.js";
+import { getPublicFileDirectory, paginate } from "../helpers.js";
 import prisma, {
     selectJoinedPostData,
     processFetchedJoinedPostData,
@@ -134,23 +134,18 @@ router.delete("/comment/:id", validator.commentExists, async (req, res) => {
 });
 
 router.get("/:id/comments", validator.postExists, async (req, res) => {
-    const page = Number(req.query.page || 1);
-    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
-
     const comments = await prisma.postComment.findMany({
         where: {
             postId: req.params.id,
         },
-        skip: (page - 1) * resultsPerPage,
-        take: resultsPerPage,
         orderBy: { commentedAt: "desc" },
+        ...paginate(req),
     });
 
     return res.json(comments);
 });
 
 router.get("/feed", async (req, res) => {
-    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
     return res.json(
         (
             (await prisma.post.findMany({
@@ -161,25 +156,20 @@ router.get("/feed", async (req, res) => {
                     postedAt: "desc",
                 },
                 ...selectJoinedPostData(req),
-                skip: ((req.query.page || 1) - 1) * resultsPerPage,
-                take: resultsPerPage,
+                ...paginate(req),
             })) || []
         ).map((p) => processFetchedJoinedPostData(p))
     );
 });
 
 router.get("/ofUser/:id", isValidUser(), async (req, res) => {
-    const page = Number(req.query.page || 1);
-    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
-
     return res.json(
         (
             (await prisma.post.findMany({
                 where: { authorId: req.params.id },
                 orderBy: { postedAt: "desc" },
                 ...selectJoinedPostData(req),
-                skip: (page - 1) * resultsPerPage,
-                take: resultsPerPage,
+                ...paginate(req),
             })) || []
         ).map((p) => processFetchedJoinedPostData(p))
     );

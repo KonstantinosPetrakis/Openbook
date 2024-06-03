@@ -1,6 +1,7 @@
 import express from "express";
 
 import { updateUserForNewNotification } from "../socket.js";
+import { paginate } from "../helpers.js";
 import prisma from "../db.js";
 
 const router = express.Router();
@@ -18,9 +19,6 @@ export async function createNotification(recipientId, type, data) {
 }
 
 router.get("/", async (req, res) => {
-    const page = Number(req.query.page) || 1;
-    const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
-
     return res.json(
         (await prisma.notification.findMany({
             where: {
@@ -29,8 +27,7 @@ router.get("/", async (req, res) => {
             orderBy: {
                 createdAt: "desc",
             },
-            skip: (page - 1) * resultsPerPage,
-            take: resultsPerPage,
+            ...paginate(req)
         })) || []
     );
 });

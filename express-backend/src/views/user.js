@@ -11,6 +11,7 @@ import {
     excludeUndefinedFieldsFromObject,
     formatFileFields,
     updateModelFile,
+    paginate
 } from "../helpers.js";
 import prisma, { friendsOf } from "../db.js";
 import { createNotification } from "./notification.js";
@@ -33,6 +34,7 @@ router.post("/register", validator.userRegister, async (req, res) => {
         });
         return res.status(201).json({ id: user.id });
     } catch (error) {
+        console.error(error)
         return res.sendStatus(409);
     }
 });
@@ -192,6 +194,38 @@ router.get("/:id", validator.isValidUser(), async (req, res) => {
             "profileImage",
             "backgroundImage",
         ])
+    );
+});
+
+router.get("/search/:query", async (req, res) => {
+    return res.json(
+        (
+            (await prisma.user.findMany({
+                where: {
+                    OR: [
+                        {
+                            firstName: {
+                                contains: req.params.query,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            lastName: {
+                                contains: req.params.query,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            email: {
+                                contains: req.params.query,
+                                mode: "insensitive",
+                            },
+                        },
+                    ],
+                },
+                ...paginate(req)
+            })) || []
+        ).map((u) => excludeFieldsFromObject(u, ["password"]))
     );
 });
 
