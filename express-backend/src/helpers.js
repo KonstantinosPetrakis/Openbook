@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import { createReadStream } from "fs";
 
 import {
     IMAGE_MIME_TYPES,
@@ -183,4 +184,42 @@ export function formatFileFields(object, fields, priv = false) {
     for (const field of fields)
         newObj[field] = newObj[field] ? getURL(newObj[field]) : null;
     return newObj;
+}
+
+/**
+ * This function is used to stream a video file.
+ * @param {object} req the request object from express.
+ * @param {object} res the response object from express.
+ * @param {string} fileName the name of the video file, including the directory.
+ */
+export async function handleVideoStream(req, res, fileName) {
+    let file;
+    try {
+        file = await fs.stat(fileName);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(404);
+    }
+
+    const range = req.headers.range;
+    if (!range) {
+        res.writeHead(200, {
+            "Content-Length": file.size,
+            "Content-Type": `video/${fileName.split(".")[1]}`,
+        });
+        return createReadStream(fileName).pipe(res);
+    }
+
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = +parts[0];
+    const end = parts[1] ? +parts[1] : file.size - 1;
+    const chunkSize = end - start + 1;
+
+    res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${end}/${file.size}`,
+        "Content-Type": `video/${fileName.split(".")[1]}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": chunkSize,
+    });
+    return createReadStream(fileName, { start, end }).pipe(res);
 }

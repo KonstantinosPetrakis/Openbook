@@ -2,7 +2,8 @@ import { validationResult } from "express-validator";
 
 export const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
 export const VIDEO_MIME_TYPES = ["video/mp4", "video/flv", "video/avi"];
-export const MAX_FILE_SIZE = 10 * 10 ** 6; // 10 MB
+export const VIDEO_EXTENSIONS = VIDEO_MIME_TYPES.map((m) => m.split("/")[1]);
+export const MAX_FILE_SIZE = 40 * 10 ** 6; // 40 MB
 
 /**
  * This function is a middleware that checks if there are any validation errors in the request.

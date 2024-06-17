@@ -20,7 +20,6 @@ createStorageDirectories();
 io.use(authMiddleware);
 app.use(checkToken);
 app.use(express.json());
-app.use("/public", express.static("storage/public"));
 app.use("/api", router);
 
 io.on("connection", onUserConnected);

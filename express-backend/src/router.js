@@ -5,6 +5,7 @@ import postRouter from "./views/post.js";
 import notificationRouter from "./views/notification.js";
 import messageRouter from "./views/message.js";
 import privateRouter from "./views/private.js";
+import publicRouter from "./views/public.js";
 
 const router = express.Router();
 
@@ -13,5 +14,6 @@ router.use("/post", postRouter);
 router.use("/notification", notificationRouter);
 router.use("/message", messageRouter);
 router.use("/private", privateRouter);
+router.use("/public", publicRouter);
 
 export default router;
