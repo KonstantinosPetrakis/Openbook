@@ -5,10 +5,6 @@ import prisma from "./db.js";
 
 const socketUserMap = {};
 
-function isValidPayload(payload) {
-    return typeof payload !== "string" && payload.hasOwnProperty("id");
-}
-
 /**
  * This is a middleware function that checks if the user is authenticated.
  * @param {Socket} socket the socket object,

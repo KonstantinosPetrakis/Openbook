@@ -8,7 +8,7 @@ function Home() {
 
     useEffect(() => {
         if (!user.isLoggedIn()) navigate("/login");
-    }), [];
+    }, []);
 
     return (
         <>

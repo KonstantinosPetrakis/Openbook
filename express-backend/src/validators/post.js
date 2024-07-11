@@ -1,11 +1,10 @@
 import { body } from "express-validator";
 import { returnValidationError } from "./helpers.js";
 
+import { multerImageVideoUploader as upload} from "../helpers.js";
+import { multerErrorHandler } from "./helpers.js";
 import prisma from "../db.js";
-import {
-    multerImageVideoUploader as upload,
-    multerErrorHandler,
-} from "../helpers.js";
+
 
 /**
  * This is a middleware function that checks if a post exists based

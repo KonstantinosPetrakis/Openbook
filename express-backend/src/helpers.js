@@ -36,21 +36,6 @@ export function paginate(req) {
 }
 
 /**
- * This function is an error middleware to handle multer errors.
- * @param {object} err
- * @param {object} req
- * @param {object} res
- * @param {Function} next
- */
-export function multerErrorHandler(err, req, res, next) {
-    if (err instanceof multer.MulterError) {
-        if (err.code === "LIMIT_FILE_SIZE") return res.sendStatus(413);
-        return res.sendStatus(400);
-    }
-    return next(err);
-}
-
-/**
  * This function creates the storage directories if they do not exist.
  */
 export async function createStorageDirectories() {

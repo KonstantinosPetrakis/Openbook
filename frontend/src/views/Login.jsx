@@ -1,16 +1,33 @@
 import { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/User";
+import { PopUpContext } from "../contexts/PopUp";
+import { isEmailValid } from "../helpers";
 
 export default function Login() {
     const user = useContext(UserContext);
+    const popUp = useContext(PopUpContext);
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    function validateForm() {
+        if (!email || !password) {
+            popUp("error", "Error", "Please fill in all fields.");
+            return false;
+        }
+
+        if (!isEmailValid(email)) {
+            popUp("error", "Error", "Invalid email.");
+            return false;
+        }
+
+        return true;
+    }
+
     useEffect(() => {
         if (user && user.isLoggedIn()) navigate("/");
-    }, [user]);
+    }, [user, navigate]);
 
     return (
         <>
@@ -43,13 +60,24 @@ export default function Login() {
                             />
                         </div>
                     </div>
-                    <a className="small-link unstyled" href="">
+                    <Link className="small-link unstyled" to="">
                         Forgot Password?
-                    </a>
+                    </Link>
+                    <Link className="small-link unstyled" to="/register">
+                        Don't have an account?
+                    </Link>
                     <button
-                        onClick={(e) => {
+                        onClick={async (e) => {
                             e.preventDefault();
-                            user.login(email, password);
+                            if (!validateForm()) return;
+                            if (await user.login(email, password))
+                                navigate("/");
+                            else
+                                popUp(
+                                    "error",
+                                    "Error",
+                                    "Invalid email or password."
+                                );
                         }}
                         className="primary-button"
                     >

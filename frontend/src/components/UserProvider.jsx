@@ -4,7 +4,8 @@
  * The user information is fetched from the server every time the page is loaded.
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useMountEffect } from "../hooks/mount";
 import { UserContext } from "../contexts/User";
 import { registerUser, loginUser, getUser, updateUser } from "../network";
 
@@ -47,9 +48,9 @@ export default function UserProvider({ children }) {
         }
     };
 
-    useEffect(() => {
+    useMountEffect(() => {
         refreshUser();
-    }, []);
+    });
 
     return (
         <UserContext.Provider value={user}>

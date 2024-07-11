@@ -1,11 +1,13 @@
 import { Gender, RelationshipStatus } from "@prisma/client";
 import { body } from "express-validator";
 
+import { multerImageUploader as upload } from "../helpers.js";
 import {
-    multerImageUploader as upload,
+    escapeUndefined,
+    isEnum,
+    returnValidationError,
     multerErrorHandler,
-} from "../helpers.js";
-import { escapeUndefined, isEnum, returnValidationError } from "./helpers.js";
+} from "./helpers.js";
 import prisma from "../db.js";
 
 /**

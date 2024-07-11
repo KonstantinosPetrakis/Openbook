@@ -1,8 +1,7 @@
 import { body } from "express-validator";
-import {
-    multerImageVideoUploader as upload,
-    multerErrorHandler,
-} from "../helpers.js";
+import { multerErrorHandler } from "./helpers.js";
+import { multerImageVideoUploader as upload} from "../helpers.js";
+
 
 export const messageValidator = [
     upload.single("file"),

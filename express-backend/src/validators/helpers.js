@@ -1,4 +1,5 @@
 import { validationResult } from "express-validator";
+import multer from "multer";
 
 export const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
 export const VIDEO_MIME_TYPES = ["video/mp4", "video/flv", "video/avi"];
@@ -56,4 +57,19 @@ export function escapeUndefined(value) {
 export function multerFileFilter(allowedMimeTypes) {
     return (req, file, cb) =>
         cb(null, allowedMimeTypes.includes(file.mimetype));
+}
+
+/**
+ * This function is an error middleware to handle multer errors.
+ * @param {object} err
+ * @param {object} req
+ * @param {object} res
+ * @param {Function} next
+ */
+export function multerErrorHandler(err, req, res, next) {
+    if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") return res.sendStatus(413);
+        return res.sendStatus(400);
+    }
+    return next(err);
 }
