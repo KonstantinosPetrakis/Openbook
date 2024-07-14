@@ -1,0 +1,25 @@
+.search-box {
+    display: flex;
+    position: relative;
+    align-items: center;
+    overflow: hidden;
+}
+
+.search-box button {
+    position: absolute;
+    right: 0;
+}
+
+.search-box input {
+    position: relative;
+    left: 100%;
+    transition: left 0.5s;
+    height: 100%;
+    width: 300px;
+    max-width: 100%;
+    padding: 15px;
+}
+
+.search-box.active input {
+    left: 0;
+}

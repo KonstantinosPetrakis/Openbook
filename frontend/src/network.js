@@ -20,25 +20,30 @@ function post(url, data) {
  * This function requests the server by using the stored token.
  * @param {string} url the url to send the request to.
  * @param {string} method the http method to use.
- * @param {object} data the data to send in the request.
+ * @param {object} data the data to send in the request, if isn't a FormData object it will be stringified as JSON.
  * @param {object} headers the headers to send in the request.
  * @returns {Promise<Response> | null} the response of the request or null if the token is not stored.
  */
 function authFetch(url, method = "GET", data = {}, headers = {}) {
-    const body = method == "GET" ? {} : { body: JSON.stringify(data) };
+    const body =
+        method === "GET"
+            ? undefined
+            : data instanceof FormData
+            ? data
+            : JSON.stringify(data);
+
     const user = localStorage.getItem("user");
     const token = user ? JSON.parse(user).token : null;
-    
+
     if (!token) return null;
 
     return fetch(`${API}/${url}`, {
         method,
         headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
             ...headers,
-            ...body
         },
+        body,
     });
 }
 
@@ -83,12 +88,20 @@ export async function loginUser(email, password) {
 
 /**
  * This function updates the user with the give
- * @param {object} user the user object to update.
- * @returns {Promise<boolean>} true if the user was updated, false otherwise.
+ * @param {object} data the data to update the user with.
+ * @returns {Promise<boolean | object>} true if the user was updated, an object with the error messages otherwise.
  */
-export async function updateUser(user) {
-    const response = await authPatch("/user", user);
-    return response.status == 200;
+export async function updateUser(data) {
+    const form = new FormData();
+    for (let key in data)
+        form.append(
+            key,
+            ["profileImage", "backgroundImage"].includes(key)
+                ? await (await fetch(data[key])).blob() // base64 to blob
+                : data[key]
+        );
+
+    return (await authPatch("user", form)).status === 200;
 }
 
 /**
@@ -98,7 +111,15 @@ export async function updateUser(user) {
  */
 export async function getUser(id) {
     const response = await authFetch(`user/${id}`);
-    return response.status == 200 ? await response.json() : null;
+    if (response.status !== 200) return null;
+
+    const data = await response.json();
+    data.profileImage = data.profileImage
+        ? `${API}/${data.profileImage}`
+        : "/images/default-profile.png";
+    data.backgroundImage = data.backgroundImage
+        ? `${API}/${data.backgroundImage}`
+        : "/images/default-background.png";
+
+    return data;
 }
-
-

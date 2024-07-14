@@ -1,0 +1,14 @@
+.editable-names {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.editable-names input {
+    max-width: 10rem;
+}
+
+.user-information input,
+.user-information select {
+    width: 100%;
+}

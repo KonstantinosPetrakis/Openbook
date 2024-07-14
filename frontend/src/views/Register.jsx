@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/User";
@@ -47,10 +47,6 @@ export default function Login() {
         return true;
     }
 
-    useEffect(() => {
-        if (user && user.isLoggedIn()) navigate("/");
-    }, [user, navigate]);
-
     const formFields = Object.keys(userData).map((field) => {
         return (
             <div key={field}>
@@ -71,6 +67,7 @@ export default function Login() {
                             [field]: e.target.value,
                         })
                     }
+                    autoFocus={field === "firstName"}
                 />
             </div>
         );
@@ -79,7 +76,7 @@ export default function Login() {
     return (
         <>
             <div className="container-small">
-                <img className="logo" src="/images/logo.png" alt="logo" />
+                <img className="big-logo" src="/images/logo.png" alt="logo" />
                 <h1> Register </h1>
                 <p className="secondary-text">
                     Enter your details to create an account.

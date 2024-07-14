@@ -55,6 +55,11 @@ export const userUpdate = [
         .customSanitizer((v) => escapeUndefined(v))
         .optional()
         .isEmail(),
+    body("password", "Password must have at least 8 characters.")
+        .isLength({
+            min: 8,
+        })
+        .optional(),
     body("firstName")
         .customSanitizer((v) => escapeUndefined(v))
         .optional()

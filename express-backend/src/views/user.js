@@ -34,7 +34,6 @@ router.post("/register", validator.userRegister, async (req, res) => {
         });
         return res.status(201).json({ id: user.id });
     } catch (error) {
-        console.error(error);
         return res.sendStatus(409);
     }
 });
@@ -59,6 +58,12 @@ router.post("/login", validator.loginValidator, async (req, res) => {
 router.patch("/", validator.userUpdate, async (req, res) => {
     const valuesToUpdate = excludeUndefinedFieldsFromObject(matchedData(req));
 
+    if (valuesToUpdate.password)
+        valuesToUpdate.password = await bcrypt.hash(
+            valuesToUpdate.password,
+            Number(process.env.SALT_HASH_ROUNDS) || 10
+        );
+
     for (const attribute of ["profileImage", "backgroundImage"]) {
         valuesToUpdate[attribute] = updateModelFile(
             req.user,
@@ -68,10 +73,14 @@ router.patch("/", validator.userUpdate, async (req, res) => {
         );
     }
 
-    await prisma.user.update({
-        where: { id: req.user.id },
-        data: valuesToUpdate,
-    });
+    try {
+        await prisma.user.update({
+            where: { id: req.user.id },
+            data: valuesToUpdate,
+        });
+    } catch (error) {
+        return res.sendStatus(409);
+    }
 
     return res.sendStatus(200);
 });

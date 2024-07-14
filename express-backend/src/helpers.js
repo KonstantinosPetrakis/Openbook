@@ -117,7 +117,12 @@ export function checkNamedFileOutOfMany(req, fileName, fileType = "image") {
  * @returns {string | null} the path to the updated file or null if the model has no file.
  */
 export function updateModelFile(model, file, attribute, fileNameGenerator) {
-    const rmFile = () => fs.unlink(getPublicFile(model[attribute]));
+    const rmFile = async () => {
+        try {
+            await fs.unlink(getPublicFileDirectory(model[attribute]));
+        } catch (e) {}
+    };
+
     if (file === undefined) return model[attribute];
     if (file === null) {
         if (model[attribute]) rmFile();

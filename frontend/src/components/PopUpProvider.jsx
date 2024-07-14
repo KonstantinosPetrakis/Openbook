@@ -1,18 +1,23 @@
 import { useState } from "react";
-
+import { ExitButton } from "./ExitButton";
 import { PopUpContext } from "../contexts/PopUp";
+import "../styles/PopUpProvider.css";
 
-export default function PopUpProvider({children}) {
+export default function PopUpProvider({ children }) {
     const [popUp, setPopUp] = useState(null);
+    const duration = 3000;
 
     function createPopUp(type, title, message) {
         setPopUp(
             <div className={`transparent pop-up ${type}`}>
                 <div className="header">
                     <h2>{title}</h2>
-                    <button onClick={() => setPopUp(null)}> 
+                    <ExitButton
+                        onClick={() => setPopUp(null)}
+                        duration={duration}
+                    >
                         <i className="bi bi-x"></i>
-                    </button>
+                    </ExitButton>
                 </div>
                 <p>{message}</p>
             </div>
@@ -20,7 +25,7 @@ export default function PopUpProvider({children}) {
 
         setTimeout(() => {
             setPopUp(null);
-        }, 5000);
+        }, duration - 500);
     }
 
     return (

@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/User";
 import { PopUpContext } from "../contexts/PopUp";
@@ -25,14 +25,10 @@ export default function Login() {
         return true;
     }
 
-    useEffect(() => {
-        if (user && user.isLoggedIn()) navigate("/");
-    }, [user, navigate]);
-
     return (
         <>
             <div className="container-small">
-                <img className="logo" src="/images/logo.png" alt="logo" />
+                <img className="big-logo" src="/images/logo.png" alt="logo" />
                 <h1> Login </h1>
                 <p className="secondary-text">
                     We're so excited to see you again!
@@ -47,6 +43,7 @@ export default function Login() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                autoFocus
                             />
                         </div>
 

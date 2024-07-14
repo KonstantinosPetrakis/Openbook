@@ -1,0 +1,266 @@
+* {
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Bold.ttf") format("truetype");
+    font-weight: bold;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Roboto", sans-serif;
+}
+
+html {
+    background: radial-gradient(
+            circle at top left,
+            rgba(0, 0, 0, 0.75) 30%,
+            rgba(0, 0, 0, 0.25)
+        ),
+        radial-gradient(
+            circle at top right,
+            rgb(12, 112, 102) 40%,
+            rgba(12, 112, 102, 0.3) 50%
+        ),
+        radial-gradient(
+            circle at bottom left,
+            rgb(26, 89, 177) 10%,
+            rgba(26, 89, 177, 0) 40%
+        ),
+        radial-gradient(
+            circle at bottom right,
+            rgb(44, 3, 57) 30%,
+            rgba(44, 5, 57, 0.8) 60%
+        );
+
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #d8d8d8;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(50, 50, 50, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0b3a58;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #126294;
+    cursor: grab;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.basic-container {
+    overflow: auto;
+}
+
+h1 {
+    margin: 1px;
+}
+
+textarea {
+    resize: none;
+    background: inherit;
+    color: inherit;
+    width: 100%;
+    height: 5rem;
+    outline: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    display: block;
+    margin: 10px 0;
+}
+
+input {
+    width: calc(100% - 10px * 2);
+    padding: 10px;
+    background: transparent;
+    outline: 0;
+    border: 1px solid rgba(224, 215, 215, 0.613);
+    border-radius: 7px;
+    color: inherit;
+}
+
+select,
+option {
+    display: block;
+    margin: 5px 0;
+    width: 100%;
+    font-size: 1rem;
+    background: rgba(0, 0, 0, 0);
+    color: inherit;
+    border: 1px solid rgba(224, 215, 215, 0.613);
+    border-radius: 7px;
+    outline: 0;
+}
+
+option {
+    background: #0b3a58;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:focus,
+select:focus,
+input:focus,
+button:focus,
+textarea:focus {
+    outline: 0;
+    border: 2px solid #0b685e;
+}
+
+.transparent {
+    background: linear-gradient(
+        45deg,
+        rgba(50, 50, 50, 0.2) 30%,
+        rgba(50, 50, 50, 0.5)
+    );
+    border-radius: 10px;
+}
+
+.padded {
+    padding: 15px;
+}
+
+.container-small {
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.container-xlarge {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.big-logo {
+    width: 16rem;
+    display: block;
+    margin: 0 auto;
+}
+
+.logo {
+    display: block;
+    width: 6rem;
+}
+
+.secondary-text {
+    color: #7c7474;
+}
+
+.small-link {
+    display: block;
+    font-size: 0.9rem;
+    color: inherit;
+    text-decoration: none;
+    margin: 2px 0 2px auto;
+}
+
+.primary-button {
+    background-color: #faf9f6;
+    color: black;
+    text-align: center;
+    padding: 10px;
+    border-radius: 7px;
+    font-size: 1.05em;
+    border: 1px solid;
+}
+
+.primary-button:hover {
+    cursor: pointer;
+    filter: brightness(0.85);
+}
+
+.simple-button {
+    color: inherit;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.transparent-button {
+    color: inherit;
+    background: linear-gradient(
+        45deg,
+        rgba(50, 50, 50, 0.2) 30%,
+        rgba(50, 50, 50, 0.5)
+    );
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.transparent-button i {
+    font-size: 1.2rem;
+}
+
+.special-button {
+    color: inherit;
+    background: linear-gradient(200deg, #165559, #0b3a58, #462966 75%);
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    position: relative;
+    bottom: 35px;
+}
+
+.special-button i {
+    font-size: 2.5rem;
+}
+
+.dual-column {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+@media (max-width: 600px) {
+    .dual-column {
+        flex-direction: column;
+    }
+
+    .dual-column > * {
+        width: 100%;
+    }
+}
+
+.not-found {
+    position: absolute;
+    left: 50%;
+    margin-top: 100px;
+    padding: 20px;
+    font-size: 1.5rem;
+    text-align: center;
+    transform: translateX(-50%);
+    display: inline-block;
+}

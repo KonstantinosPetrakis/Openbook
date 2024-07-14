@@ -1,0 +1,39 @@
+.uploaded-image {
+    position: relative;
+}
+
+.uploaded-image label {
+    text-align: center;
+    position: absolute;
+    right: 50%;
+    bottom: 50%;
+    transform: translate(50%, 50%);
+    padding: 10px;
+}
+
+.uploaded-image label {
+    text-align: center;
+}
+
+.uploaded-image input[type="file"] {
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+}
+
+label:has(input[type="file"]:focus) {
+    border: 2px solid #0b685e;
+}
+
+.image-editor {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.image-editor button {
+    margin: 10px;
+}

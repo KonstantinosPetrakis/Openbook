@@ -1,0 +1,54 @@
+.profile-background img {
+    width: 100%;
+    aspect-ratio: 3 / 1;
+    object-fit: cover;
+}
+
+.profile-basic {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: -40px;
+}
+
+.profile-image img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 150px;
+    border-radius: 50%;
+    border: 1px solid rgba(46, 46, 46, 0.664);
+    margin: 10px;
+}
+
+.profile-controls {
+    margin-left: auto;
+}
+
+.user-information {
+    position: sticky;
+    left: 0;
+    top: 0;
+    padding: 10px;
+}
+
+.user-information i {
+    margin: 10px;
+}
+
+.user-information p {
+    margin: 10px 0;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.219);
+    border-radius: 5px;
+}
+
+.posts {
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .user-information {
+        position: initial;
+    }
+}
