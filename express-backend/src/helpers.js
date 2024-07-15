@@ -26,7 +26,8 @@ export const multerImageVideoUploader = multer({
  * @returns {object} an object that contains the skip and take values for db query.
  */
 export function paginate(req) {
-    const page = Number(req.query.page || 1);
+    const page = Number(req.query.page < 1 ? 1 : req.query.page);
+    console.log(page, req.params.query)
     const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
 
     return {

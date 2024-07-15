@@ -41,6 +41,10 @@ export default function Profile() {
                                 Edit Profile
                             </Link>
                         )}
+                        {sessionUser.id !== user.id && (
+                            <button className="transparent-button"> Add friend </button>
+                            // The add button could also be with a cancel, accept, decline or remove based on the relationship status
+                        )}
                     </div>
                 </div>
                 <div className="dual-column">

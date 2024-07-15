@@ -9,7 +9,7 @@ export default function PopUpProvider({ children }) {
 
     function createPopUp(type, title, message) {
         setPopUp(
-            <div className={`transparent pop-up ${type}`}>
+            <div className={`pop-up ${type}`}>
                 <div className="header">
                     <h2>{title}</h2>
                     <ExitButton

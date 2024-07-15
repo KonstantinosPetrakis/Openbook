@@ -7,6 +7,8 @@
     top: 0%;
     left: 50%;
     transform: translateX(-50%);
+    background: rgba(73, 73, 73, 0.541);
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .pop-up .header {

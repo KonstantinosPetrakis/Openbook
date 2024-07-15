@@ -123,3 +123,16 @@ export async function getUser(id) {
 
     return data;
 }
+
+/**
+ * This function searches for users with the given query.
+ * @param {string} query the query to search for, could be first name, last name or email.
+ * @param {number} page the page to get, default is 1.
+ * @returns {promise<Array<object>>} the users that match the query.
+ */
+export async function searchUser(query, page = 1) {
+    if (!query) return [];
+    const response = await authFetch(`user/search/${query}?page=${page}`);
+    if (response.status !== 200) return [];
+    return await response.json();
+}

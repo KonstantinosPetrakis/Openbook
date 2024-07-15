@@ -61,7 +61,10 @@ export default function Me() {
                 delete data[key];
         }
 
-        if (Object.keys(data).length === 0) return;
+        if (Object.keys(data).length === 0) {
+            popUp("warning", "Warning", "No changes detected.");
+            return;
+        }
 
         if (await user.update(data)) navigate(`/profile/${user.id}`);
         else popUp("error", "Error", "Email already in use.");

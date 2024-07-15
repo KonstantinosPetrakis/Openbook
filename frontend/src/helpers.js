@@ -18,3 +18,27 @@ export function camelToTitle(camelCaseText) {
 export function isEmailValid(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+/**
+ * This function returns a debounced version of a function.
+ * @param {Function} func the original function.
+ * @param {number} timeout for how long to wait before calling the function.
+ * @returns {Function} the new asynchronous and debounced function.
+ */
+export function debounce(func, timeout = 500) {
+    let timer;
+
+    return (...args) => {
+        return new Promise((resolve, reject) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                try {
+                    let output = func(...args);
+                    resolve(output);
+                } catch (err) {
+                    reject(err);
+                }
+            }, timeout);
+        });
+    };
+}
