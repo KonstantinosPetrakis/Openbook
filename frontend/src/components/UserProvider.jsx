@@ -6,7 +6,16 @@
 
 import { useEffect, useState } from "react";
 import { UserContext } from "../contexts/User";
-import { registerUser, loginUser, getUser, updateUser } from "../network";
+import {
+    registerUser,
+    loginUser,
+    getUser,
+    updateUser,
+    addFriend,
+    deleteFriend,
+    readNotification,
+    getNotifications,
+} from "../network";
 
 export default function UserProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -33,6 +42,10 @@ export default function UserProvider({ children }) {
             isLoggedIn: () => {
                 return !!localStorage.getItem("user");
             },
+            addFriend,
+            deleteFriend,
+            getNotifications,
+            readNotification,
         };
 
         const refreshUser = async () => {

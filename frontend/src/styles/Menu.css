@@ -4,44 +4,74 @@
     padding: 0;
     left: 0;
     bottom: 0;
-    width: 100vw;
+    width: 100%;
     height: 150px;
-    overflow: hidden;
     flex-shrink: 0;
 }
 
-.menu * {
+.menu > ul > li > a,
+.menu > ul > li > button {
     font-size: 0.8rem;
 }
 
-.menu ul {
+.menu > ul {
     list-style: none;
-    padding-left: 0;
+    margin: 0;
+    padding: 0;
     position: absolute;
-    top: 13%;
-    height: 100%;
+    top: 55%;
     width: 100%;
     display: flex;
     align-items: center;
 }
 
-.menu li {
+.menu > ul > li {
     text-align: center;
     width: 100%;
 }
 
-.menu svg {
+.menu > svg {
+    display: block;
     width: 100%;
     height: 100%;
     color: rgba(255, 255, 255, 0.11);
 }
 
-.menu a {
+.menu > ul > li > a {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
 }
 
-.menu i {
+.menu > ul i {
     font-size: 1.7rem;
+}
+
+.notification-button {
+    position: relative;
+}
+
+.notification-loader {
+    display: none;
+    position: absolute;
+    transform: translateX(-50%);
+    bottom: 150%;
+    right: 0;
+    width: 400px;
+    max-width: 95%;
+    max-height: 500px;
+}
+
+.notification-loader.active {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .notification-loader {
+        position: fixed;
+        left: 50%;
+        right: auto;
+        bottom: 150px;
+        top: auto;
+    }
 }

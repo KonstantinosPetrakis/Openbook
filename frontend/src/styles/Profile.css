@@ -51,4 +51,13 @@
     .user-information {
         position: initial;
     }
+
+    .profile-basic {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-controls {
+        margin-left: 0;
+    }
 }

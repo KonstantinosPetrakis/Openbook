@@ -14,10 +14,7 @@ export default function NavBar() {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        if (location.pathname.includes("profile")) {
-            setSearchQuery("");
-            setSearchActive(false);
-        }
+        if (location.pathname.includes("profile")) setSearchActive(false);
     }, [location]);
 
     return (
@@ -26,7 +23,7 @@ export default function NavBar() {
                 <Link to="/">
                     <img className="logo" src="/images/logo.png" alt="logo" />
                 </Link>
-                {searchQuery && (
+                {searchActive && (
                     <Loader
                         key={searchQuery}
                         className="search-results"

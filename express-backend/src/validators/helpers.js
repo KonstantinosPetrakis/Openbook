@@ -34,22 +34,6 @@ export function isEnum(value, enumObject, nullable = true) {
 }
 
 /**
- * This is a sanitizers that allows undefined values to pass through.
- * @description Default escape sanitizers will convert undefined to an empty string which is not what we want.
- * @param {string | undefined} value the value to sanitize.
- * @returns the sanitized value.
- */
-export function escapeUndefined(value) {
-    if (value === undefined) return undefined;
-    return value
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-/**
  * This function returns a multer file filter function.
  * @param {Array<string>} allowedMimeTypes the allowed mime types.
  * @returns the multer file filter function.

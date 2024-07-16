@@ -6,6 +6,7 @@ export default function Loader({
     fetchFunction,
     reverse = false,
     className = "",
+    onClick = () => {}
 }) {
     const [data, setData] = useState([]);
     const [page, setPage] = useState(1);
@@ -16,23 +17,31 @@ export default function Loader({
         const observer = new IntersectionObserver(() =>
             setPage((prevPage) => (stopLoading ? prevPage : prevPage + 1))
         );
-        observer.observe(obs.current);
+        if (obs.current) observer.observe(obs.current);
         return () => observer.disconnect();
-    }, [stopLoading]);
+    }, [data, stopLoading]);
 
     useEffect(() => {
         (async () => {
             const d = await fetchFunction(page);
             setStopLoading(d.length === 0);
-            setData((data) => (reverse ? [...d, ...data] : [...data, ...d]));
+            // Normally ids are unique, but the filtering is required to prevent
+            // errors happening due to strict mode during development.
+            setData((data) => {
+                const dataIds = data.map((d) => d.id);
+                const filteredD = d.filter((d) => !dataIds.includes(d.id));
+                return reverse
+                    ? [...filteredD, ...data]
+                    : [...data, ...filteredD];
+            });
         })();
     }, [fetchFunction, page, reverse]);
 
     return (
-        data && (
+        !!data.length && (
             <div className={`loader ${className}`}>
                 {reverse && <div ref={obs}></div>}
-                <Renderer data={data} />
+                <Renderer data={data} onClick={onClick}/>
                 {!reverse && <div ref={obs}> </div>}
             </div>
         )

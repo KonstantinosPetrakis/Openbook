@@ -12,9 +12,16 @@
 
 .search-results {
     position: absolute;
-    height: 500px;
-    width: 500px;
+    max-height: 500px;
+    width: 400px;
+    max-width: 100%;
     top: 100%;
     right: 50px;
     z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .search-results {
+        right: 0
+    }
 }

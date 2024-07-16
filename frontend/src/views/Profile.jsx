@@ -9,6 +9,7 @@ import "../styles/Profile.css";
 export default function Profile() {
     const sessionUser = useContext(UserContext);
     const [user, setUser] = useState(null);
+    const [rerenderSwitch, setRerenderswitch] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -20,7 +21,22 @@ export default function Profile() {
             u.gender = GENDER[u.gender];
             setUser(u);
         })();
-    }, [navigate, id]);
+    }, [navigate, id, rerenderSwitch]);
+
+    const positiveFunction = async () =>
+        (await sessionUser.addFriend(user.id)) &&
+        setRerenderswitch(!rerenderSwitch);
+
+    const negativeFunction = async () =>
+        (await sessionUser.deleteFriend(user.id)) &&
+        setRerenderswitch(!rerenderSwitch);
+
+    const profileControls = {
+        stranger: { text: "Add Friend", func: positiveFunction },
+        requested: { text: "Cancel Request", func: negativeFunction },
+        received: { text: "Accept Request", func: positiveFunction },
+        friend: { text: "Unfriend", func: negativeFunction },
+    };
 
     return (
         user && (
@@ -36,14 +52,19 @@ export default function Profile() {
                         {user.firstName} {user.lastName}
                     </h2>
                     <div className="profile-controls">
-                        {sessionUser.id === user.id && (
+                        {sessionUser.id === user.id ? (
                             <Link className="transparent-button" to="/me">
                                 Edit Profile
                             </Link>
-                        )}
-                        {sessionUser.id !== user.id && (
-                            <button className="transparent-button"> Add friend </button>
-                            // The add button could also be with a cancel, accept, decline or remove based on the relationship status
+                        ) : (
+                            <button
+                                onClick={
+                                    profileControls[user.friendshipStatus].func
+                                }
+                                className="transparent-button"
+                            >
+                                {profileControls[user.friendshipStatus].text}
+                            </button>
                         )}
                     </div>
                 </div>

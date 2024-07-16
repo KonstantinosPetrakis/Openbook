@@ -1,10 +1,14 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/User";
+import NotificationList from "./NotificationList";
+import Loader from "./Loader";
 import "../styles/Menu.css";
 
 export default function Menu() {
     const user = useContext(UserContext);
+    const [notificationLoaderActive, setNotificationLoaderActive] =
+        useState(false);
 
     return (
         user.isLoggedIn() && (
@@ -37,14 +41,32 @@ export default function Menu() {
                             <i className="bi bi-plus"></i>
                         </button>
                     </li>
-                    <li>
-                        <button className="simple-button">
+                    <li className="notification-button">
+                        <Loader
+                            className={`notification-loader ${
+                                notificationLoaderActive ? "active" : ""
+                            }`}
+                            Renderer={NotificationList}
+                            fetchFunction={user.getNotifications}
+                            onClick={() => setNotificationLoaderActive(false)}
+                        />
+                        <button
+                            className="simple-button"
+                            onClick={() =>
+                                setNotificationLoaderActive(
+                                    !notificationLoaderActive
+                                )
+                            }
+                        >
                             <i className="bi bi-bell"></i>
                             <div> Notifications </div>
                         </button>
                     </li>
                     <li>
-                        <Link className="simple-button" to={`/profile/${user.id}`}>
+                        <Link
+                            className="simple-button"
+                            to={`/profile/${user.id}`}
+                        >
                             <i className="bi bi-person"></i>
                             <div> Profile </div>
                         </Link>

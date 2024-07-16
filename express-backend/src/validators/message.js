@@ -6,6 +6,6 @@ import { multerImageVideoUploader as upload} from "../helpers.js";
 export const messageValidator = [
     upload.single("file"),
     multerErrorHandler,
-    body("content").escape().trim(),
+    body("content").trim(),
     body("recipientId").isString(),
 ];

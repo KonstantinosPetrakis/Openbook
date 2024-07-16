@@ -67,7 +67,7 @@ async function updateUser(token, fields) {
  * @param {string} id the id of the user.
  * @returns {Promise<object | undefined>} the user or undefined if the request failed.
  */
-async function getUser(token, id) {
+export async function getUser(token, id) {
     const response = await authFetch(`${URL}/user/${id}`, token);
     return response.ok ? await response.json() : undefined;
 }

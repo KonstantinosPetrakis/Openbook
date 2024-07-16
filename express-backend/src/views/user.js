@@ -199,6 +199,29 @@ router.get("/friendRequests", async (req, res) => {
 });
 
 router.get("/:id", validator.isValidUser(), async (req, res) => {
+    const friendshipRecord = await prisma.friendship.findFirst({
+        where: {
+            OR: [
+                {
+                    requestedById: req.user.id,
+                    acceptedById: req.extraUser.id,
+                },
+                {
+                    requestedById: req.extraUser.id,
+                    acceptedById: req.user.id,
+                },
+            ],
+        },
+    });
+
+    req.extraUser.friendshipStatus = friendshipRecord
+        ? friendshipRecord.acceptedAt
+            ? "friend"
+            : friendshipRecord.requestedById === req.user.id
+            ? "requested"
+            : "received"
+        : "stranger";
+
     return res.json(
         formatFileFields(excludeFieldsFromObject(req.extraUser, ["password"]), [
             "profileImage",
@@ -235,7 +258,11 @@ router.get("/search/:query", async (req, res) => {
                 },
                 ...paginate(req),
             })) || []
-        ).map((u) => excludeFieldsFromObject(u, ["password"]))
+        )
+            .map((u) => excludeFieldsFromObject(u, ["password"]))
+            .map((u) =>
+                formatFileFields(u, ["profileImage", "backgroundImage"])
+            )
     );
 });
 

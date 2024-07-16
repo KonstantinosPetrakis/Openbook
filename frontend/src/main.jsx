@@ -6,9 +6,9 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "react-image-crop/dist/ReactCrop.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-    // <React.StrictMode>
+    <React.StrictMode>
         <BrowserRouter>
             <App />
         </BrowserRouter>        
-    // </React.StrictMode>
+    </React.StrictMode>
 );

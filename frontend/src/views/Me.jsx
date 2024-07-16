@@ -114,6 +114,7 @@ export default function Me() {
                         setUserData({ ...userData, profileImage: src })
                     }
                     aspectRatio={1}
+                    circular={true}
                 />
                 <div className="editable-names">
                     <input

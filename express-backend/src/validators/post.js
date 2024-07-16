@@ -47,7 +47,7 @@ export async function commentExists(req, res, next) {
 export const postCreate = [
     upload.fields([{ name: "files", maxCount: 20 }]),
     multerErrorHandler,
-    body("content").escape(),
+    body("content").trim(),
     returnValidationError,
 ];
 
@@ -55,6 +55,6 @@ export const commentCreate = [
     upload.single("file"),
     multerErrorHandler,
     postExists,
-    body("content").escape(),
+    body("content"),
     returnValidationError,
 ];

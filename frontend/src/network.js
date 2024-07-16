@@ -57,6 +57,16 @@ function authPatch(url, data) {
     return authFetch(url, "PATCH", data);
 }
 
+function formatUser(user) {
+    user.profileImage = user.profileImage
+        ? `${API}/${user.profileImage}`
+        : "/images/default-profile.png";
+    user.backgroundImage = user.backgroundImage
+        ? `${API}/${user.backgroundImage}`
+        : "/images/default-background.png";
+    return user;
+}
+
 /**
  * This function registers the user.
  * @param {string} email the email of the user
@@ -112,16 +122,7 @@ export async function updateUser(data) {
 export async function getUser(id) {
     const response = await authFetch(`user/${id}`);
     if (response.status !== 200) return null;
-
-    const data = await response.json();
-    data.profileImage = data.profileImage
-        ? `${API}/${data.profileImage}`
-        : "/images/default-profile.png";
-    data.backgroundImage = data.backgroundImage
-        ? `${API}/${data.backgroundImage}`
-        : "/images/default-background.png";
-
-    return data;
+    return formatUser(await response.json());
 }
 
 /**
@@ -134,5 +135,45 @@ export async function searchUser(query, page = 1) {
     if (!query) return [];
     const response = await authFetch(`user/search/${query}?page=${page}`);
     if (response.status !== 200) return [];
-    return await response.json();
+    return (await response.json()).map(formatUser);
+}
+
+/**
+ * This function sends or accepts a friend request with the given user.
+ * @param {string} userId the id of the user to send/accept the friend request.
+ * @returns {Promise<boolean>} true if the request was sent, false otherwise.
+ */
+export async function addFriend(userId) {
+    const response = await authFetch(`user/addFriend/${userId}`, "POST");
+    return [200, 201].includes(response.status);
+}
+
+/**
+ * This function deletes a friend, or denies or cancels a friend request.
+ * @param {string} userId the id of the user to delete the friendship record.
+ * @returns {Promise<boolean>} true if the friend record was deleted, false otherwise.
+ */
+export async function deleteFriend(userId) {
+    const response = await authFetch(`user/deleteFriend/${userId}`, "DELETE");
+    return response.status === 200;
+}
+
+/**
+ * This functions gets the notifications of the user.
+ * @param {number} page the page to get, default is 1.
+ * @returns {Promise<Array<object>>} the notifications of the user.
+ */
+export async function getNotifications(page = 1) {
+    const response = await authFetch(`notification/?page=${page}`);
+    return response.status === 200 ? await response.json() : [];
+}
+
+/**
+ * This function marks a notification as read.
+ * @param {string} notificationId the id of the notification to mark as read.
+ * @returns {Promise<boolean>} true if the notification was marked as read, false otherwise.
+ */
+export async function readNotification(notificationId) {
+    const response = await authPatch(`notification/read/${notificationId}`);
+    return response.status === 200;
 }

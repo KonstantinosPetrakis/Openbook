@@ -50,7 +50,7 @@ export function assertEqual(actual, expected) {
     if (JSON.stringify(actual) === JSON.stringify(expected)) {
         if (VERBOSE) console.log(`✅ ${actual} = ${expected}`);
     } else {
-        console.error(`❌ ${actual} != ${expected}`);
+        console.error(`❌ ${JSON.stringify(actual, null, 4)} != ${JSON.stringify(expected, null, 4)}`);
         process.exit(1);
     }
 }

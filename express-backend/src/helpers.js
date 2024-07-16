@@ -26,8 +26,7 @@ export const multerImageVideoUploader = multer({
  * @returns {object} an object that contains the skip and take values for db query.
  */
 export function paginate(req) {
-    const page = Number(req.query.page < 1 ? 1 : req.query.page);
-    console.log(page, req.params.query)
+    const page = Number(req.query.page < 1 ? 1 : req.query.page) || 1;
     const resultsPerPage = Number(process.env.RESULTS_PER_PAGE || 10);
 
     return {
@@ -150,8 +149,8 @@ export function excludeFieldsFromObject(obj, fields) {
 }
 
 /**
- * This function is used to escape undefined values in an object.
- * @param {object} obj the object to escape undefined values from.
+ * This function is used to exclude undefined values in an object.
+ * @param {object} obj the object to exclude undefined values from.
  * @returns {object} the new object without the undefined values.
  */
 export function excludeUndefinedFieldsFromObject(obj) {
@@ -166,7 +165,7 @@ export function excludeUndefinedFieldsFromObject(obj) {
  * This function is used to format image fields in an object.
  * @param {object} object the object that contains the image fields.
  * @param {array<string>} fields the image fields to format.
- * @param {boolean} priv whether the image fields are private or not.
+ * @param {boolean} priv whether the image fields are private or not. Default is false.
  * @returns {object} the object with the formatted image fields.
  */
 export function formatFileFields(object, fields, priv = false) {
@@ -188,7 +187,6 @@ export async function handleVideoStream(req, res, fileName) {
     try {
         file = await fs.stat(fileName);
     } catch (error) {
-        console.log(error);
         return res.sendStatus(404);
     }
 

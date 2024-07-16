@@ -25,6 +25,7 @@ export default function SearchBox({ search, setSearch, active, setActive }) {
                 tabIndex={active ? 0 : -1}
                 value={localSearch}
                 onInput={(e) => updateSearch(e.target.value)}
+                onFocus={() => setActive(true)}
             />
             <button
                 className="transparent-button"
