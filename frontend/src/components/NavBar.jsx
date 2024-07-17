@@ -1,5 +1,5 @@
-import { useState, useContext, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/User";
 import SearchBox from "./SearchBox";
 import ProfilePreviewList from "./ProfilePreviewList";
@@ -8,14 +8,9 @@ import { searchUser } from "../network";
 import "../styles/NavBar.css";
 
 export default function NavBar() {
-    const location = useLocation();
     const user = useContext(UserContext);
     const [searchActive, setSearchActive] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-
-    useEffect(() => {
-        if (location.pathname.includes("profile")) setSearchActive(false);
-    }, [location]);
 
     return (
         user.isLoggedIn() && (
@@ -26,7 +21,8 @@ export default function NavBar() {
                 {searchActive && (
                     <Loader
                         key={searchQuery}
-                        className="search-results"
+                        onClick={() => setSearchActive(false)}
+                        className="list search-results"
                         Renderer={ProfilePreviewList}
                         fetchFunction={(p) => searchUser(searchQuery, p)}
                     />

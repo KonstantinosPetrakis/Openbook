@@ -32,7 +32,7 @@ export async function getFriendRequests(token) {
  */
 export async function getFriends(token) {
     const response = await authFetch(`${URL}/user/friends`, token);
-    return (await response.json()).friends;
+    return await response.json();
 }
 
 /**

@@ -11,19 +11,19 @@ import { createStorageDirectories } from "./helpers.js";
 
 dotenv.config();
 
+const DEBUG = process.env.DEBUG === "true";
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
-
+const io = new Server(server, { cors: DEBUG ? { origin: "*" } : {} });
 
 createStorageDirectories();
-app.use(cors());
+if (DEBUG) app.use(cors());
 io.use(authMiddleware);
 app.use(checkToken);
 app.use(express.json());
 app.use("/public", express.static("storage/public"));
-app.use("/api", router);    
+app.use("/api", router);
 
 io.on("connection", onUserConnected);
 

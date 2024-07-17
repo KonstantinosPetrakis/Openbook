@@ -1,4 +1,7 @@
-const API = "http://localhost:3000/api";
+import { io } from "socket.io-client";
+
+const SERVER = "http://localhost:3000";
+const API = `${SERVER}/api`;
 
 /**
  * A wrapper around fetch to make a POST request.
@@ -176,4 +179,20 @@ export async function getNotifications(page = 1) {
 export async function readNotification(notificationId) {
     const response = await authPatch(`notification/read/${notificationId}`);
     return response.status === 200;
+}
+
+export async function getUnreadNotificationCount() {
+    const response = await authFetch("notification/count");
+    return response.status === 200 ? await response.json() : 0;
+}
+
+export async function getFriends() {
+    const response = await authFetch("user/friends");
+    return response.status === 200 ? await response.json() : [];
+}
+
+export function createSocket() {
+    return io(SERVER, {
+        auth: { token: JSON.parse(localStorage.getItem("user")).token, withCredentials: true},
+    });
 }

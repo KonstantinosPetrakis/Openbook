@@ -180,7 +180,7 @@ router.delete(
 );
 
 router.get("/friends", async (req, res) => {
-    return res.json({ friends: await friendsOf(req.user) });
+    return res.json(await friendsOf(req.user));
 });
 
 router.get("/friendRequests", async (req, res) => {

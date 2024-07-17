@@ -1,12 +1,4 @@
-.profile-preview-list {
-    display: inline-flex;
-    flex-direction: column;
-    list-style: none;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.397);
-    background-color: rgba(0, 0, 0, 0.863);
-}
+
 
 .profile-preview-list > li {
     border-bottom: 1px solid white;
@@ -20,7 +12,8 @@
 }
 
 .profile-preview-list div:has(img) {
-    margin-right: auto;
+    margin-right: 1rem;
+
 }
 
 .profile-preview-list img {

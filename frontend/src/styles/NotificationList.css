@@ -1,9 +1,5 @@
 .notification-list-wrapper {
     text-align: left;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.397);
-    background-color: rgba(0, 0, 0, 0.863);
     margin: 0;
 }
 
@@ -15,22 +11,36 @@
 }
 
 .notification-list > li {
-    display: flex;
     border-bottom: 1px solid white;
     padding: 10px;
 }
 
-.notification-list a {
+.notification-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-date {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.397);
+    text-align: right;
+}
+
+.notification-body {
+    display: flex;
+}
+
+.notification-body a {
     display: flex;
     align-items: center;
 }
 
-.notification-list div:has(img) {
+.notification-body div:has(img) {
     padding: 5px;
     margin-right: auto;
 }
 
-.notification-list img {
+.notification-body img {
     width: 30px;
     height: 30px;
     border-radius: 50%;

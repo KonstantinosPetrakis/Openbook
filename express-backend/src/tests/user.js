@@ -18,7 +18,7 @@ import {
  * @param {string} lastName the last name of the user.
  * @returns {Promise<string | undefined>} the id of the user or undefined if the request failed.
  */
-async function createUser(email, password, firstName, lastName) {
+export async function createUser(email, password, firstName, lastName) {
     const response = await fetch(`${URL}/user/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,7 +34,7 @@ async function createUser(email, password, firstName, lastName) {
  * @param {string} password the password of the user.
  * @return {Promise<string | undefined>} the token of the user or undefined if the request failed.
  */
-async function loginUser(email, password) {
+export async function loginUser(email, password) {
     const response = await fetch(`${URL}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

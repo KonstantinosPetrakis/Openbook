@@ -27,8 +27,19 @@ router.get("/", async (req, res) => {
             orderBy: {
                 createdAt: "desc",
             },
-            ...paginate(req)
+            ...paginate(req),
         })) || []
+    );
+});
+
+router.get("/count", async (req, res) => {
+    return res.json(
+        await prisma.notification.count({
+            where: {
+                recipientId: req.user.id,
+                read: false,
+            },
+        })
     );
 });
 

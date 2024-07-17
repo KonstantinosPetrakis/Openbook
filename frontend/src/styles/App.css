@@ -153,6 +153,19 @@ textarea:focus {
     border-radius: 10px;
 }
 
+.list {
+    display: inline-flex;
+    flex-direction: column;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.397);
+    background-color: rgba(0, 0, 0, 0.863);
+}
+
+.list ul {
+    list-style: none;
+}
+
 .padded {
     padding: 15px;
 }
@@ -243,6 +256,18 @@ textarea:focus {
     border-radius: 50%;
     position: relative;
     bottom: 35px;
+}
+
+.pill {
+    display: inline-block;
+    position: absolute;
+    background: #1655594b;
+    width: 1.5rem;
+    height: 1.5rem;
+    text-align: center;
+    line-height: 1.75rem;
+    padding: auto;
+    border-radius: 50%;
 }
 
 .special-button i {

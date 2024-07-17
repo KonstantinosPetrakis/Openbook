@@ -6,7 +6,7 @@ export default function Loader({
     fetchFunction,
     reverse = false,
     className = "",
-    onClick = () => {}
+    onClick = () => {},
 }) {
     const [data, setData] = useState([]);
     const [page, setPage] = useState(1);
@@ -14,8 +14,13 @@ export default function Loader({
     const obs = useRef();
 
     useEffect(() => {
-        const observer = new IntersectionObserver(() =>
-            setPage((prevPage) => (stopLoading ? prevPage : prevPage + 1))
+        const observer = new IntersectionObserver((entries) =>
+            entries.forEach(
+                (e) =>
+                    e.intersectionRatio > 0 &&
+                    !stopLoading &&
+                    setPage((p) => p + 1)
+            )
         );
         if (obs.current) observer.observe(obs.current);
         return () => observer.disconnect();
@@ -40,9 +45,19 @@ export default function Loader({
     return (
         !!data.length && (
             <div className={`loader ${className}`}>
-                {reverse && <div ref={obs}></div>}
-                <Renderer data={data} onClick={onClick}/>
-                {!reverse && <div ref={obs}> </div>}
+                {reverse && (
+                    <div ref={obs}>
+                        {/* The br is required to trigger observer correctly */}
+                        <br />
+                    </div>
+                )}
+                <Renderer data={data} setData={setData} onClick={onClick} />
+                {!reverse && (
+                    <div ref={obs}>
+                        {/* The br is required to trigger observer correctly */}
+                        <br />
+                    </div>
+                )}
             </div>
         )
     );

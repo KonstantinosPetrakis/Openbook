@@ -15,6 +15,8 @@ import {
     deleteFriend,
     readNotification,
     getNotifications,
+    getFriends,
+    getUnreadNotificationCount
 } from "../network";
 
 export default function UserProvider({ children }) {
@@ -42,10 +44,12 @@ export default function UserProvider({ children }) {
             isLoggedIn: () => {
                 return !!localStorage.getItem("user");
             },
+            getFriends,
             addFriend,
             deleteFriend,
             getNotifications,
             readNotification,
+            getUnreadNotificationCount
         };
 
         const refreshUser = async () => {

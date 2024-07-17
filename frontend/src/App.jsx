@@ -6,6 +6,7 @@ import Login from "./views/Login";
 import Register from "./views/Register";
 import UserProvider from "./components/UserProvider";
 import PopUpProvider from "./components/PopUpProvider";
+import RealTimeProvider from "./components/RealTimeProvider";
 import NavBar from "./components/NavBar";
 import Menu from "./components/Menu";
 import Profile from "./views/Profile";
@@ -17,11 +18,13 @@ function App() {
     return (
         <UserProvider>
             <PopUpProvider>
-                <NavBar />
-                <div className="basic-container">
-                    <ApplicationRoutes />
-                </div>
-                <Menu />
+                <RealTimeProvider>
+                    <NavBar />
+                    <div className="basic-container">
+                        <ApplicationRoutes />
+                    </div>
+                    <Menu />
+                </RealTimeProvider>
             </PopUpProvider>
         </UserProvider>
     );

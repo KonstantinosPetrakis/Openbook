@@ -1,18 +1,40 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/User";
+import { RealTimeContext } from "../contexts/RealTime";
 import NotificationList from "./NotificationList";
+import { notificationContext } from "../contexts/Notification";
 import Loader from "./Loader";
 import "../styles/Menu.css";
 
 export default function Menu() {
     const user = useContext(UserContext);
-    const [notificationLoaderActive, setNotificationLoaderActive] =
-        useState(false);
+    const realTime = useContext(RealTimeContext);
+    const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+    const [notificationListActive, setNotificationListActive] = useState(false);
+    const [refreshNotification, setRefreshNotification] = useState(false);
+    const alertAudio = useRef(null);
+
+    useEffect(() => {
+        const refNot = () => {
+            setRefreshNotification((prev) => !prev);
+            alertAudio.current.play();
+        };
+        realTime.onNewNotification(refNot);
+        return () => realTime.offNewNotification(refNot);
+    }, [realTime]);
+
+    useEffect(() => {
+        (async () => {
+            if (!user.isLoggedIn()) return;
+            setUnreadNotificationCount(await user.getUnreadNotificationCount());
+        })();
+    }, [user, refreshNotification]);
 
     return (
         user.isLoggedIn() && (
             <nav className="menu">
+                <audio ref={alertAudio} src="/audio/alert.mp3"></audio>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 1440 320"
@@ -41,20 +63,32 @@ export default function Menu() {
                             <i className="bi bi-plus"></i>
                         </button>
                     </li>
-                    <li className="notification-button">
-                        <Loader
-                            className={`notification-loader ${
-                                notificationLoaderActive ? "active" : ""
-                            }`}
-                            Renderer={NotificationList}
-                            fetchFunction={user.getNotifications}
-                            onClick={() => setNotificationLoaderActive(false)}
-                        />
+                    <li
+                        key={refreshNotification}
+                        className="notification-button"
+                    >
+                        <notificationContext.Provider
+                            value={setUnreadNotificationCount}
+                        >
+                            <Loader
+                                className={`list notification-loader ${
+                                    notificationListActive ? "active" : ""
+                                }`}
+                                Renderer={NotificationList}
+                                fetchFunction={user.getNotifications}
+                                onClick={() => setNotificationListActive(false)}
+                            />
+                        </notificationContext.Provider>
+                        {!!unreadNotificationCount && (
+                            <div className="pill">
+                                {unreadNotificationCount}
+                            </div>
+                        )}
                         <button
                             className="simple-button"
                             onClick={() =>
-                                setNotificationLoaderActive(
-                                    !notificationLoaderActive
+                                setNotificationListActive(
+                                    !notificationListActive
                                 )
                             }
                         >

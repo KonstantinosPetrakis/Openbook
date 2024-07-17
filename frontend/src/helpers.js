@@ -42,3 +42,27 @@ export function debounce(func, timeout = 500) {
         });
     };
 }
+
+/**
+ * This function shows a time difference in a human readable format.
+ * @param {Date} d1 the first date.
+ * @param {Date} d2 the second date.
+ * @returns {string} the time difference in a human readable format.
+ */
+export function timeDifference(d1, d2 = new Date()) {
+    let units = {
+        year: 24 * 60 * 60 * 1000 * 365,
+        month: (24 * 60 * 60 * 1000 * 365) / 12,
+        day: 24 * 60 * 60 * 1000,
+        hour: 60 * 60 * 1000,
+        minute: 60 * 1000,
+        second: 1000,
+    };
+
+    let rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    let elapsed = d1 - d2;
+
+    for (let u in units)
+        if (Math.abs(elapsed) > units[u] || u == "second")
+            return rtf.format(Math.round(elapsed / units[u]), u);
+}

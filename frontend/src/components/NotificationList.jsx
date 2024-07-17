@@ -1,37 +1,62 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/User";
+import { notificationContext } from "../contexts/Notification";
+import { timeDifference } from "../helpers";
 import { getUser } from "../network";
 import "../styles/NotificationList.css";
 
-export default function NotificationList({ data, onClick }) {
-    const user = readNotification(UserContext);
+export default function NotificationList({ data, setData, onClick }) {
+    const user = useContext(UserContext);
+    const setUnreadNotificationCount = useContext(notificationContext);
 
     const componentMap = {
         FRIEND_REQUEST: FriendRequestNotification,
-        FRIEND_REQUEST_ACCEPTED: FriendRequestAcceptedNotification,
+        FRIEND_REQUEST_ACCEPTED: FriendRequestNotification,
         FRIEND_POSTED: FriendPostedNotification,
         POST_LIKED: PostLikedNotification,
         POST_COMMENTED: PostCommentedNotification,
     };
 
-    function readNotification(notification) {
-        user.readNotification(notification.id);
-        // update the UI somehow
+    async function readNotification(notification) {
+        await user.readNotification(notification.id);
+        const dataCopy = [...data];
+        dataCopy.find((n) => n.id === notification.id).read = true;
+        setData(dataCopy);
+        setUnreadNotificationCount((prev) => prev - 1);
     }
-    
+
     return (
         <div className="notification-list-wrapper">
             <h3> Notifications </h3>
             <ul className="notification-list">
-                {data.map((notification) => (
-                    <li key={notification.id} onClick={onClick}>
-                        {componentMap[notification.type]({ notification })}
-                        <button className="simple-button" disabled={notification.read}>
-                            <i className="bi bi-check-lg"></i>
-                        </button>
-                    </li>
-                ))}
+                {data.map((notification) => {
+                    const Component = componentMap[notification.type];
+                    return (
+                        <li key={notification.id} onClick={onClick}>
+                            <div className="notification-rows">
+                                <div className="notification-date">
+                                    {timeDifference(
+                                        new Date(notification.createdAt)
+                                    )}
+                                </div>
+                                <div className="notification-body">
+                                    <Component notification={notification} />
+                                    <button
+                                        className="simple-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            readNotification(notification);
+                                        }}
+                                        disabled={notification.read}
+                                    >
+                                        <i className="bi bi-check-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );
@@ -56,16 +81,16 @@ function FriendRequestNotification({ notification }) {
                 <div>
                     <b>
                         {requestUser.firstName} {requestUser.lastName}
-                    </b>{" "}
-                    wants to be your friend!
+                    </b>
+                    {` ${
+                        notification.type === "FRIEND_REQUEST"
+                            ? "sent you a friend request!"
+                            : "accepted your friend request!"
+                    }`}
                 </div>
             </Link>
         )
     );
-}
-
-function FriendRequestAcceptedNotification({ notification }) {
-    return <div>Friend request accepted - {notification.id} </div>;
 }
 
 function FriendPostedNotification({ notification }) {
