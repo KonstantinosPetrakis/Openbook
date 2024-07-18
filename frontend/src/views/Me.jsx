@@ -1,14 +1,12 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../contexts/User";
-import { PopUpContext } from "../contexts/PopUp";
-import { camelToTitle } from "../helpers";
+import { UserContext, PopUpContext } from "../contexts";
 import UploadedImage from "../components/UploadedImage";
 import ChoiceInput from "../components/ChoiceInput";
+import { GENDER, RELATIONSHIP_STATUS, PROFILE_ICONS } from "../constants";
+import { isEmailValid, camelToTitle } from "../helpers";
 import "../styles/Profile.css";
 import "../styles/Me.css";
-import { GENDER, RELATIONSHIP_STATUS, PROFILE_ICONS } from "../constants";
-import { isEmailValid } from "../helpers";
 
 export default function Me() {
     const navigate = useNavigate();

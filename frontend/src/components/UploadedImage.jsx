@@ -57,7 +57,7 @@ export default function UploadedImage({ src, setSrc, className, aspectRatio, cir
             <OffCanvas
                 title="Crop image to fit desired ratio..."
                 open={editing}
-                onClose={handleDone}
+                closeFunc={handleDone}
             >
                 <div className="image-editor">
                     <ReactCrop

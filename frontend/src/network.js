@@ -60,12 +60,27 @@ function authPatch(url, data) {
     return authFetch(url, "PATCH", data);
 }
 
+/**
+ * This function formats the source of a server file to allow the frontend server to
+ * be different from the backend server.
+ * @param {string} fileSrc the source of the file as returned from the server.
+ * @returns {string} the source of the file formatted correctly.
+ */
+function formatServerSrc(fileSrc) {
+    return `${API}/${fileSrc}`;
+}
+
+/**
+ * This function formats the files of a user to apply defaults and format the source.
+ * @param {object} user the unformatted user object.
+ * @returns {object} the formatted user object.
+ */
 function formatUser(user) {
     user.profileImage = user.profileImage
-        ? `${API}/${user.profileImage}`
+        ? formatServerSrc(user.profileImage)
         : "/images/default-profile.png";
     user.backgroundImage = user.backgroundImage
-        ? `${API}/${user.backgroundImage}`
+        ? formatServerSrc(user.backgroundImage)
         : "/images/default-background.png";
     return user;
 }
@@ -181,18 +196,61 @@ export async function readNotification(notificationId) {
     return response.status === 200;
 }
 
+/**
+ * This function gets the count of unread notifications.
+ * @returns {Promise<number>} the count of unread notifications.
+ */
 export async function getUnreadNotificationCount() {
     const response = await authFetch("notification/count");
     return response.status === 200 ? await response.json() : 0;
 }
 
+/**
+ * This function gets the friends of the user.
+ * @returns {Promise<Array<object>>} the friends of the user.
+ */
 export async function getFriends() {
     const response = await authFetch("user/friends");
     return response.status === 200 ? await response.json() : [];
 }
 
+/**
+ * This function creates a socket connection to the server.
+ * @returns {Socket | null} the socket connection or null if the user is not logged in.
+ */
 export function createSocket() {
-    return io(SERVER, {
-        auth: { token: JSON.parse(localStorage.getItem("user")).token, withCredentials: true},
-    });
+    const tokenStore = localStorage.getItem("user");
+    if (!tokenStore) return null;
+
+    const token = JSON.parse(tokenStore).token;
+    return token ? io(SERVER, { auth: { token } }) : null;
+}
+
+/**
+ * This function creates a post with the given content and files.
+ * @param {string} content the content of the post.
+ * @param {Array<File>} files the files to attach to the post.
+ * @returns {Promise<string | null>} the id of the post, null if the post could not be created.
+ */
+export async function createPost(content, files) {
+    console.log(files);
+    const form = new FormData();
+    form.append("content", content);
+    files.forEach((f) => form.append("files", f));
+    const r = await authFetch("post", "POST", form);
+    return r.status === 201 ? (await r.json()).id : null;
+}
+
+/**
+ * This function gets a post by id.
+ * @param {string} id the id of the post.
+ * @returns {Promise<object | null>} the post object, null if the post could not be found.
+ */
+export async function getPost(id) {
+    const response = await authFetch(`post/${id}`);
+    if (response.status !== 200) return null;
+    const data = await response.json();
+    data.author = formatUser(data.author);
+    data.files = data.files.map(formatServerSrc);
+    return data;
 }

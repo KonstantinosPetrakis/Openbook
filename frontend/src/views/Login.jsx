@@ -1,7 +1,6 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserContext } from "../contexts/User";
-import { PopUpContext } from "../contexts/PopUp";
+import { UserContext, PopUpContext } from "../contexts";
 import { isEmailValid } from "../helpers";
 
 export default function Login() {

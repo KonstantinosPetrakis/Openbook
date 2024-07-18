@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { UserContext } from "../contexts/User";
+import { UserContext } from "../contexts";
 import { getUser } from "../network";
 import { camelToTitle } from "../helpers";
 import { PROFILE_ICONS, GENDER, RELATIONSHIP_STATUS } from "../constants";

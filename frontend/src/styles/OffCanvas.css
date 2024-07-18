@@ -14,8 +14,10 @@
 }
 
 .off-canvas-content {
-    background-color: rgba(0, 0, 0, 0.616);
+    background-color: rgba(0, 0, 0, 0.89);
     padding: 20px;
+    height: 500px;
+    overflow-y: auto;
 }
 
 .off-canvas-header {

@@ -1,10 +1,9 @@
 import { body } from "express-validator";
 import { returnValidationError } from "./helpers.js";
 
-import { multerImageVideoUploader as upload} from "../helpers.js";
+import { multerImageVideoUploader as upload } from "../helpers.js";
 import { multerErrorHandler } from "./helpers.js";
 import prisma from "../db.js";
-
 
 /**
  * This is a middleware function that checks if a post exists based
@@ -45,7 +44,7 @@ export async function commentExists(req, res, next) {
 }
 
 export const postCreate = [
-    upload.fields([{ name: "files", maxCount: 20 }]),
+    upload.array("files", 20),
     multerErrorHandler,
     body("content").trim(),
     returnValidationError,

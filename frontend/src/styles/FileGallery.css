@@ -1,0 +1,86 @@
+.file-gallery {
+    width: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.file-gallery li {
+    position: relative;
+}
+
+.file-gallery .simple-button {
+    padding: 0;
+}
+
+.file-gallery:has(:nth-child(3n + 1)) li {
+    width: 100%;
+}
+
+.file-gallery:has(:nth-child(3n + 2)) li {
+    width: calc(100% / 2);
+}
+
+.file-gallery:has(:nth-child(3n + 3)) li {
+    width: calc(100% / 3);
+}
+
+.file-gallery .more {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    text-shadow: 1px 1px 1px black;
+}
+
+.file-gallery > li > button,
+.file-gallery img,
+.file-gallery video {
+    width: 100%;
+    height: 100%;
+}
+
+.file-gallery img:hover,
+.file-gallery video:hover {
+    cursor: pointer;
+}
+
+.fullscreen-file-gallery {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.877);
+}
+
+.fullscreen-controls {
+    position: relative;
+    display: flex;
+    z-index: 1;
+    align-items: center;
+    text-align: center;
+    height: 10%;
+}
+
+.fullscreen-controls .exit,
+.fullscreen-controls .previous {
+    margin-left: auto;
+}
+
+.fullscreen-file-gallery img,
+.fullscreen-file-gallery video {
+    position: absolute;
+    top: 10%;
+    width: 100%;
+    height: 85%;
+    object-fit: contain;
+}
+
+.fullscreen-controls button {
+    margin: 0.5rem;
+}

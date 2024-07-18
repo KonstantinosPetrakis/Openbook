@@ -1,9 +1,11 @@
 import { useRef } from "react";
 import { createSocket } from "../network";
-import { RealTimeContext } from "../contexts/RealTime";
+import { RealTimeContext } from "../contexts";
 
 export default function RealTimeProvider({children}) {
     const socket = useRef(createSocket()).current;
+
+    if (!socket) return children;
 
     return (
         socket && (

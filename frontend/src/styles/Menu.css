@@ -58,11 +58,9 @@
 .menu .notification-loader {
     display: none;
     position: absolute;
-    transform: translateX(-50%);
     bottom: 150%;
     right: 0;
     width: 400px;
-    max-width: 95%;
     max-height: 500px;
 }
 
@@ -71,11 +69,9 @@
 }
 
 @media (max-width: 768px) {
-    .notification-loader {
+    .menu .notification-loader {
         position: fixed;
-        left: 50%;
-        right: auto;
-        bottom: 150px;
-        top: auto;
+        bottom: 10%;
+        width: 90%;
     }
 }

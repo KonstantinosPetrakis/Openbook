@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { UserContext } from "../contexts/User";
+import { UserContext } from "../contexts";
 import {
     registerUser,
     loginUser,
@@ -16,7 +16,9 @@ import {
     readNotification,
     getNotifications,
     getFriends,
-    getUnreadNotificationCount
+    getUnreadNotificationCount,
+    createPost,
+    getPost,
 } from "../network";
 
 export default function UserProvider({ children }) {
@@ -49,7 +51,9 @@ export default function UserProvider({ children }) {
             deleteFriend,
             getNotifications,
             readNotification,
-            getUnreadNotificationCount
+            getUnreadNotificationCount,
+            createPost,
+            getPost,
         };
 
         const refreshUser = async () => {

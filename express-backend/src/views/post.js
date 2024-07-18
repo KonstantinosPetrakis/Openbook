@@ -25,7 +25,7 @@ router.post("/", validator.postCreate, async (req, res) => {
     });
 
     await prisma.postFile.createMany({
-        data: (req.files?.files || []).map((file) => {
+        data: (req.files || []).map((file) => {
             file.id = cuid();
             const fileName = `${file.id}.${file.mimetype.split("/")[1]}`;
             fs.writeFile(getPublicFileDirectory(fileName), file.buffer);

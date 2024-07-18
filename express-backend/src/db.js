@@ -52,6 +52,8 @@ export function selectJoinedPostData(req) {
 export function processFetchedJoinedPostData(post) {
     post = excludeFieldsFromObject(post, ["authorId"]);
 
+
+    post.author = formatFileFields(post.author, ["profileImage"]);
     post.files = post.files.map(
         (file) => formatFileFields(file, ["file"]).file
     );

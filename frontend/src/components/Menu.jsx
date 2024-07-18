@@ -1,9 +1,9 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../contexts/User";
-import { RealTimeContext } from "../contexts/RealTime";
+import { UserContext, RealTimeContext, notificationContext } from "../contexts";
+import OffCanvas from "../components/OffCanvas";
+import CreatePost from "./CreatePost";
 import NotificationList from "./NotificationList";
-import { notificationContext } from "../contexts/Notification";
 import Loader from "./Loader";
 import "../styles/Menu.css";
 
@@ -12,10 +12,13 @@ export default function Menu() {
     const realTime = useContext(RealTimeContext);
     const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
     const [notificationListActive, setNotificationListActive] = useState(false);
+    const [createPostActive, setCreatePostActive] = useState(false);
     const [refreshNotification, setRefreshNotification] = useState(false);
     const alertAudio = useRef(null);
 
     useEffect(() => {
+        if (!realTime) return;
+
         const refNot = () => {
             setRefreshNotification((prev) => !prev);
             alertAudio.current.play();
@@ -59,9 +62,19 @@ export default function Menu() {
                         </button>
                     </li>
                     <li>
-                        <button className="special-button">
+                        <button
+                            className="special-button"
+                            onClick={() => setCreatePostActive((c) => !c)}
+                        >
                             <i className="bi bi-plus"></i>
                         </button>
+                        <OffCanvas
+                            title="Create a post"
+                            open={createPostActive}
+                            closeFunc={() => setCreatePostActive(false)}
+                        >
+                            <CreatePost />
+                        </OffCanvas>
                     </li>
                     <li
                         key={refreshNotification}
@@ -86,11 +99,7 @@ export default function Menu() {
                         )}
                         <button
                             className="simple-button"
-                            onClick={() =>
-                                setNotificationListActive(
-                                    !notificationListActive
-                                )
-                            }
+                            onClick={() => setNotificationListActive((c) => !c)}
                         >
                             <i className="bi bi-bell"></i>
                             <div> Notifications </div>

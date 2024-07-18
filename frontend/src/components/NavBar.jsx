@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../contexts/User";
+import { UserContext } from "../contexts";
 import SearchBox from "./SearchBox";
 import ProfilePreviewList from "./ProfilePreviewList";
 import Loader from "./Loader";

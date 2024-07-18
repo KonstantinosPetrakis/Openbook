@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../contexts/User";
-import { notificationContext } from "../contexts/Notification";
+import { UserContext, notificationContext } from "../contexts";
 import { timeDifference } from "../helpers";
 import { getUser } from "../network";
 import "../styles/NotificationList.css";
@@ -94,7 +93,32 @@ function FriendRequestNotification({ notification }) {
 }
 
 function FriendPostedNotification({ notification }) {
-    return <div>Friend posted - {notification.id} </div>;
+    console.log(notification)
+    const [friendPosted, setFriendPosted] = useState(null);
+
+    useEffect(() => {
+        (async () => {
+            const user = await getUser(notification.data.userId);
+            setFriendPosted(user);
+        })();
+    }, [notification]);
+
+    return (
+        friendPosted && (
+            <Link to={`/post/${notification.data.postId}`}>
+                <div>
+                    <img src={friendPosted.profileImage} alt="profile picture" />
+                </div>
+                <div>
+                    <b>
+                       {`${friendPosted.firstName} ${friendPosted.lastName} `}
+                    </b>
+                    wrote a new post!
+                </div>
+            </Link>
+        )
+    );
+    
 }
 
 function PostLikedNotification({ notification }) {

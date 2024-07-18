@@ -1,8 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { UserContext } from "../contexts/User";
-import { PopUpContext } from "../contexts/PopUp";
+import { UserContext, PopUpContext } from "../contexts";
 import { camelToTitle, isEmailValid } from "../helpers";
 
 export default function Login() {

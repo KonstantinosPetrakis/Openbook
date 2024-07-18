@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ExitButton } from "./ExitButton";
-import { PopUpContext } from "../contexts/PopUp";
+import { PopUpContext } from "../contexts";
 import "../styles/PopUpProvider.css";
 
 export default function PopUpProvider({ children }) {

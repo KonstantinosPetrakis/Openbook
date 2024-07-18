@@ -35,6 +35,11 @@
     align-items: center;
 }
 
+.notification-body button {
+    margin-left: auto;
+    width: 10%;
+}
+
 .notification-body div:has(img) {
     padding: 5px;
     margin-right: auto;
