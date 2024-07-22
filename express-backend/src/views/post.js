@@ -6,7 +6,11 @@ import cuid from "cuid";
 
 import * as validator from "../validators/post.js";
 import { isValidUser } from "../validators/user.js";
-import { getPublicFileDirectory, paginate } from "../helpers.js";
+import {
+    getPublicFileDirectory,
+    getPublicFileURL,
+    paginate,
+} from "../helpers.js";
 import prisma, {
     selectJoinedPostData,
     processFetchedJoinedPostData,
@@ -38,12 +42,14 @@ router.post("/", validator.postCreate, async (req, res) => {
     });
 
     const friends = await friendsOf(req.user);
+    const userPublicImage = getPublicFileURL(req.user.profileImage);
     friends.forEach((friendId) => {
         createNotification(friendId, NotificationType.FRIEND_POSTED, {
             postId: post.id,
             userId: req.user.id,
-            userFirstName: req.user.firstName,
-            userLastName: req.user.lastName,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            profileImage: userPublicImage
         });
     });
     return res.status(201).json({ id: post.id });
@@ -56,8 +62,7 @@ router.delete("/:id", validator.postExists, async (req, res) => {
         where: { postId: req.params.id },
     });
 
-    files.forEach((file) => fs.unlink(getPublicFileDirectory(file.file)));
-    await prisma.postFile.deleteMany({ where: { postId: req.params.id } });
+    files.forEach((file) => fs.unlink(getPublicFileDirectory(file.file)));    
     await prisma.post.delete({ where: { id: req.params.id } });
     return res.sendStatus(200);
 });
@@ -86,8 +91,9 @@ router.post("/like/:id", async (req, res) => {
         await createNotification(post.authorId, NotificationType.POST_LIKED, {
             postId: req.params.id,
             userId: req.user.id,
-            userFirstName: req.user.firstName,
-            userLastName: req.user.lastName,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            profileImage: getPublicFileURL(req.user.profileImage)
         });
         return res.sendStatus(201);
     }
@@ -118,8 +124,10 @@ router.post("/comment/:id", validator.commentCreate, async (req, res) => {
         {
             postId: req.params.id,
             userId: req.user.id,
-            userFirstName: req.user.firstName,
-            userLastName: req.user.lastName,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            profileImage: getPublicFileURL(req.user.profileImage),
+            content: content || "An attachment",
         }
     );
     return res.status(201).json({ id: comment.id });
@@ -138,9 +146,17 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
         where: {
             postId: req.params.id,
         },
+        include: {
+            author: true
+        },
         orderBy: { commentedAt: "desc" },
         ...paginate(req),
     });
+
+    for (let comment of comments) {
+        comment.file = getPublicFileURL(comment.file);
+        comment.author.profileImage = getPublicFileURL(comment.author.profileImage);
+    }
 
     return res.json(comments);
 });

@@ -12,6 +12,7 @@ export default function Loader({
     const [page, setPage] = useState(1);
     const [stopLoading, setStopLoading] = useState(false);
     const obs = useRef();
+    const PAGE_SIZE = 10;
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) =>
@@ -29,7 +30,7 @@ export default function Loader({
     useEffect(() => {
         (async () => {
             const d = await fetchFunction(page);
-            setStopLoading(d.length === 0);
+            setStopLoading(d.length < PAGE_SIZE);
             // Normally ids are unique, but the filtering is required to prevent
             // errors happening due to strict mode during development.
             setData((data) => {

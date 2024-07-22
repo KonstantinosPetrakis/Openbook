@@ -65,11 +65,11 @@ export function getPrivateFileDirectory(fileName) {
 
 /**
  * This function is used to get the public URL of a file.
- * @param {string} fileName the name of the file.
- * @returns {string} the public path of the file.
+ * @param {string | null | undefined} fileName the name of the file.
+ * @returns {string | null} the public path of the file. Null if the file is null.
  */
 export function getPublicFileURL(fileName) {
-    return `/public/${fileName}`;
+    return fileName ? `/public/${fileName}` : null;
 }
 
 /**

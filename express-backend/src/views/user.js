@@ -12,6 +12,7 @@ import {
     formatFileFields,
     updateModelFile,
     paginate,
+    getPublicFileURL,
 } from "../helpers.js";
 import prisma, { friendsOf } from "../db.js";
 import { createNotification } from "./notification.js";
@@ -86,6 +87,13 @@ router.patch("/", validator.userUpdate, async (req, res) => {
 });
 
 router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
+    const userDict = {
+        userId: req.user.id,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        profileImage: getPublicFileURL(req.user.profileImage),
+    };
+
     const friendEntity = await prisma.friendship.findFirst({
         where: {
             OR: [
@@ -112,7 +120,7 @@ router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
         await createNotification(
             req.extraUser.id,
             NotificationType.FRIEND_REQUEST,
-            { userId: req.user.id }
+            userDict
         );
         return res.sendStatus(201);
     }
@@ -137,7 +145,7 @@ router.post("/addFriend/:id", validator.isValidUser(), async (req, res) => {
         await createNotification(
             req.extraUser.id,
             NotificationType.FRIEND_REQUEST_ACCEPTED,
-            { userId: req.user.id }
+            userDict
         );
         return res.sendStatus(200);
     }

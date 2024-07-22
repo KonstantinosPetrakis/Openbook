@@ -63,11 +63,11 @@ function authPatch(url, data) {
 /**
  * This function formats the source of a server file to allow the frontend server to
  * be different from the backend server.
- * @param {string} fileSrc the source of the file as returned from the server.
- * @returns {string} the source of the file formatted correctly.
+ * @param {string | null | undefined} fileSrc the source of the file as returned from the server.
+ * @returns {string | null} the source of the file formatted correctly, null if the fileSrc is null or undefined.
  */
 function formatServerSrc(fileSrc) {
-    return `${API}/${fileSrc}`;
+    return fileSrc ? `${API}/${fileSrc}` : null;
 }
 
 /**
@@ -183,7 +183,12 @@ export async function deleteFriend(userId) {
  */
 export async function getNotifications(page = 1) {
     const response = await authFetch(`notification/?page=${page}`);
-    return response.status === 200 ? await response.json() : [];
+    if (response.status !== 200) return [];
+
+    return (await response.json()).map((n) => {
+        n.data = formatUser(n.data);
+        return n;
+    });
 }
 
 /**
@@ -233,7 +238,6 @@ export function createSocket() {
  * @returns {Promise<string | null>} the id of the post, null if the post could not be created.
  */
 export async function createPost(content, files) {
-    console.log(files);
     const form = new FormData();
     form.append("content", content);
     files.forEach((f) => form.append("files", f));
@@ -253,4 +257,67 @@ export async function getPost(id) {
     data.author = formatUser(data.author);
     data.files = data.files.map(formatServerSrc);
     return data;
+}
+
+/**
+ * This function gets the comments of a post.
+ * @param {string} postId the id of the post to get the comments of.
+ * @param {number} page the page to get, default is 1.
+ * @returns {Promise<Array<object>>} the comments of the post.
+ */
+export async function getPostComments(postId, page = 1) {
+    const response = await authFetch(`/post/${postId}/comments?page=${page}`);
+    if (response.status !== 200) return [];
+    return (await response.json()).map((c) => {
+        c.author = formatUser(c.author);
+        c.file = formatServerSrc(c.file);
+        return c;
+    });
+}
+
+/**
+ * This function likes a post.
+ * @param {string} id the id of the post to like.
+ * @returns {Promise<boolean | null>} true if the post was liked, false if the post was unliked, null if the post could not be liked.
+ */
+export async function likePost(id) {
+    const response = await authFetch(`post/like/${id}`, "POST");
+    return [200, 201].includes(response.status) || null;
+}
+
+/**
+ * This function comments on a post.
+ * @param {string} postId the id of the post to comment on.
+ * @param {string} content the content of the comment to post.
+ * @param {File} file the file to attach to the comment.
+ * @returns {Promise<string | null>} the id of the comment, null if the comment could not be posted.
+ */
+export async function commentPost(postId, content = "", file = null) {
+    if (!content && !file) return null;
+
+    const form = new FormData();
+    form.append("content", content);
+    if (file) form.append("file", file);
+    const response = await authFetch(`post/comment/${postId}`, "POST", form);
+    return response.status === 201 ? (await response.json()).id : null;
+}
+
+/**
+ * This function deletes a post.
+ * @param {string} postId the id of the post to delete.
+ * @returns {Promise<boolean>} true if the post was deleted, false otherwise.
+ */
+export async function deletePost(postId) {
+    const response = await authFetch(`post/${postId}`, "DELETE");
+    return response.status === 200;
+}
+
+/**
+ * This function deletes a comment.
+ * @param {string} commentId the id of the comment to delete.
+ * @returns {Promise<boolean>} true if the comment was deleted, false otherwise.
+ */
+export async function deleteComment(commentId) {
+    const response = await authFetch(`post/comment/${commentId}`, "DELETE");
+    return response.status === 200;
 }

@@ -1,8 +1,21 @@
 import { validationResult } from "express-validator";
 import multer from "multer";
 
-export const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
-export const VIDEO_MIME_TYPES = ["video/mp4", "video/webm", "video/flv", "video/avi"];
+export const IMAGE_MIME_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+];
+export const VIDEO_MIME_TYPES = [
+    "video/mp4",
+    "video/webm",
+    "video/flv",
+    "video/avi",
+    "video/mov",
+    "video/wmv",
+    "video/mkv",
+];
 export const VIDEO_EXTENSIONS = VIDEO_MIME_TYPES.map((m) => m.split("/")[1]);
 export const MAX_FILE_SIZE = 40 * 10 ** 6; // 40 MB
 

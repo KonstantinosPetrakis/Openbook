@@ -61,7 +61,7 @@
     bottom: 150%;
     right: 0;
     width: 400px;
-    max-height: 500px;
+    height: 500px;
 }
 
 .notification-loader.active {

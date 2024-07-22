@@ -1,8 +1,7 @@
-import { useState, useEffect, useContext } from "react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext, notificationContext } from "../contexts";
 import { timeDifference } from "../helpers";
-import { getUser } from "../network";
 import "../styles/NotificationList.css";
 
 export default function NotificationList({ data, setData, onClick }) {
@@ -12,9 +11,9 @@ export default function NotificationList({ data, setData, onClick }) {
     const componentMap = {
         FRIEND_REQUEST: FriendRequestNotification,
         FRIEND_REQUEST_ACCEPTED: FriendRequestNotification,
-        FRIEND_POSTED: FriendPostedNotification,
-        POST_LIKED: PostLikedNotification,
-        POST_COMMENTED: PostCommentedNotification,
+        FRIEND_POSTED: PostInteraction,
+        POST_LIKED: PostInteraction,
+        POST_COMMENTED: PostInteraction,
     };
 
     async function readNotification(notification) {
@@ -62,69 +61,45 @@ export default function NotificationList({ data, setData, onClick }) {
 }
 
 function FriendRequestNotification({ notification }) {
-    const [requestUser, setRequestUser] = useState(null);
-
-    useEffect(() => {
-        (async () => {
-            const user = await getUser(notification.data.userId);
-            setRequestUser(user);
-        })();
-    }, [notification]);
-
     return (
-        requestUser && (
-            <Link to={`/profile/${requestUser.id}`}>
-                <div>
-                    <img src={requestUser.profileImage} alt="profile picture" />
-                </div>
-                <div>
-                    <b>
-                        {requestUser.firstName} {requestUser.lastName}
-                    </b>
-                    {` ${
-                        notification.type === "FRIEND_REQUEST"
-                            ? "sent you a friend request!"
-                            : "accepted your friend request!"
-                    }`}
-                </div>
-            </Link>
-        )
+        <Link to={`/profile/${notification.data.userId}`}>
+            <div>
+                <img
+                    src={notification.data.profileImage}
+                    alt="profile picture"
+                />
+            </div>
+            <div>
+                <b>
+                    {notification.data.firstName} {notification.data.lastName}
+                </b>
+                {` ${
+                    notification.type === "FRIEND_REQUEST"
+                        ? "sent you a friend request!"
+                        : "accepted your friend request!"
+                }`}
+            </div>
+        </Link>
     );
 }
 
-function FriendPostedNotification({ notification }) {
-    console.log(notification)
-    const [friendPosted, setFriendPosted] = useState(null);
-
-    useEffect(() => {
-        (async () => {
-            const user = await getUser(notification.data.userId);
-            setFriendPosted(user);
-        })();
-    }, [notification]);
-
+function PostInteraction({ notification }) {
     return (
-        friendPosted && (
-            <Link to={`/post/${notification.data.postId}`}>
-                <div>
-                    <img src={friendPosted.profileImage} alt="profile picture" />
-                </div>
-                <div>
-                    <b>
-                       {`${friendPosted.firstName} ${friendPosted.lastName} `}
-                    </b>
-                    wrote a new post!
-                </div>
-            </Link>
-        )
+        <Link to={`/post/${notification.data.postId}`}>
+            <div>
+                <img
+                    src={notification.data.profileImage}
+                    alt="profile picture"
+                />
+            </div>
+            <div>
+                <b>{`${notification.data.firstName} ${notification.data.lastName} `}</b>
+                {notification.type === "POST_LIKED"
+                    ? "liked your post!"
+                    : notification.type === "POST_COMMENTED"
+                    ? "commented on your post!"
+                    : "shared a new post!"}
+            </div>
+        </Link>
     );
-    
-}
-
-function PostLikedNotification({ notification }) {
-    return <div>Post liked - {notification.id} </div>;
-}
-
-function PostCommentedNotification({ notification }) {
-    return <div>Post commented - {notification.id} </div>;
 }

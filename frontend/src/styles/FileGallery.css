@@ -1,10 +1,12 @@
 .file-gallery {
+    --spacing: 0.3rem;
     width: 100%;
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-wrap: wrap;
+    gap: var(--spacing);
 }
 
 .file-gallery li {
@@ -20,11 +22,11 @@
 }
 
 .file-gallery:has(:nth-child(3n + 2)) li {
-    width: calc(100% / 2);
+    width: calc(100% / 2 - var(--spacing));
 }
 
 .file-gallery:has(:nth-child(3n + 3)) li {
-    width: calc(100% / 3);
+    width: calc(100% / 3 - 2 * var(--spacing));
 }
 
 .file-gallery .more {

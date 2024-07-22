@@ -19,6 +19,11 @@ import {
     getUnreadNotificationCount,
     createPost,
     getPost,
+    deletePost,
+    getPostComments,
+    likePost,
+    commentPost,
+    deleteComment,
 } from "../network";
 
 export default function UserProvider({ children }) {
@@ -54,6 +59,11 @@ export default function UserProvider({ children }) {
             getUnreadNotificationCount,
             createPost,
             getPost,
+            deletePost,
+            getPostComments,
+            likePost,
+            commentPost,
+            deleteComment,
         };
 
         const refreshUser = async () => {
