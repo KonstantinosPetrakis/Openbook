@@ -24,6 +24,8 @@ import {
     likePost,
     commentPost,
     deleteComment,
+    getFeed,
+    getPostsOfUser,
 } from "../network";
 
 export default function UserProvider({ children }) {
@@ -64,6 +66,8 @@ export default function UserProvider({ children }) {
             likePost,
             commentPost,
             deleteComment,
+            getFeed,
+            getPostsOfUser,
         };
 
         const refreshUser = async () => {

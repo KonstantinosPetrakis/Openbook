@@ -49,7 +49,7 @@ router.post("/", validator.postCreate, async (req, res) => {
             userId: req.user.id,
             firstName: req.user.firstName,
             lastName: req.user.lastName,
-            profileImage: userPublicImage
+            profileImage: userPublicImage,
         });
     });
     return res.status(201).json({ id: post.id });
@@ -62,7 +62,7 @@ router.delete("/:id", validator.postExists, async (req, res) => {
         where: { postId: req.params.id },
     });
 
-    files.forEach((file) => fs.unlink(getPublicFileDirectory(file.file)));    
+    files.forEach((file) => fs.unlink(getPublicFileDirectory(file.file)));
     await prisma.post.delete({ where: { id: req.params.id } });
     return res.sendStatus(200);
 });
@@ -93,7 +93,7 @@ router.post("/like/:id", async (req, res) => {
             userId: req.user.id,
             firstName: req.user.firstName,
             lastName: req.user.lastName,
-            profileImage: getPublicFileURL(req.user.profileImage)
+            profileImage: getPublicFileURL(req.user.profileImage),
         });
         return res.sendStatus(201);
     }
@@ -147,7 +147,7 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
             postId: req.params.id,
         },
         include: {
-            author: true
+            author: true,
         },
         orderBy: { commentedAt: "desc" },
         ...paginate(req),
@@ -155,7 +155,9 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
 
     for (let comment of comments) {
         comment.file = getPublicFileURL(comment.file);
-        comment.author.profileImage = getPublicFileURL(comment.author.profileImage);
+        comment.author.profileImage = getPublicFileURL(
+            comment.author.profileImage
+        );
     }
 
     return res.json(comments);

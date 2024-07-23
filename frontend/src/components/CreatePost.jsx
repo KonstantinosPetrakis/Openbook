@@ -1,4 +1,4 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext, PopUpContext, OffCanvasContext } from "../contexts";
 import FileGallery from "./FileGallery";
@@ -39,6 +39,11 @@ export default function CreatePost() {
             );
     }
 
+    const postFilesURLs = useMemo(
+        () => postFiles.map((f) => URL.createObjectURL(f)),
+        [postFiles]
+    );
+
     return (
         <form className="create-post">
             <textarea
@@ -66,11 +71,7 @@ export default function CreatePost() {
                     Clear
                 </button>
             </div>
-            {!!postFiles.length && (
-                <FileGallery
-                    files={postFiles.map((f) => URL.createObjectURL(f))}
-                />
-            )}
+            {!!postFiles.length && <FileGallery files={postFilesURLs} />}
             <br />
             <button className="transparent-button" onClick={createPost}>
                 Post

@@ -1,0 +1,8 @@
+.post-list {
+    list-style: unset;
+    padding: 0;
+}
+
+.post-list li {
+    margin-bottom: 2rem;
+}

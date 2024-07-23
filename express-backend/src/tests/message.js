@@ -110,10 +110,10 @@ export async function main() {
     assertCallable(
         await getChats(tokens[2]),
         (messages) =>
-            messages[0].id === userIds[3] &&
-            messages[1].id === userIds[6] &&
-            messages[2].id == userIds[5] &&
-            messages[3].id == userIds[4] &&
+            messages[0].friendId === userIds[3] &&
+            messages[1].friendId === userIds[6] &&
+            messages[2].friendId == userIds[5] &&
+            messages[3].friendId == userIds[4] &&
             messages[0].attention == false &&
             messages[1].attention == false &&
             messages[2].attention == true &&

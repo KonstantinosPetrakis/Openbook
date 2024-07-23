@@ -321,3 +321,48 @@ export async function deleteComment(commentId) {
     const response = await authFetch(`post/comment/${commentId}`, "DELETE");
     return response.status === 200;
 }
+
+/**
+ * This function gets the feed of the user.
+ * @param {number} page the page to get, default is 1.
+ * @returns {Promise<Array<object>>} the feed of the user.
+ */
+export async function getFeed(page = 1) {
+    const response = await authFetch(`post/feed?page=${page}`);
+    if (response.status !== 200) return [];
+    return (await response.json()).map((p) => {
+        p.author = formatUser(p.author);
+        p.files = p.files.map(formatServerSrc);
+        return p;
+    });
+}
+
+/**
+ * This function gets the posts of a specific user.
+ * @param {string} userId the id of the user to get the posts of.
+ * @param {number} page the page to get, default is 1.
+ */
+export async function getPostsOfUser(userId, page = 1) {
+    const response = await authFetch(`post/ofUser/${userId}?page=${page}`);
+    if (response.status !== 200) return [];
+    return (await response.json()).map((p) => {
+        p.author = formatUser(p.author);
+        p.files = p.files.map(formatServerSrc);
+        return p;
+    });
+}
+
+
+/**
+ * This function gets the last chats the session user had.
+ * @param {number} page the page to get, default is 1.
+ * @returns {Promise<Array<object>>} the chats of the user.
+ */
+export async function getChats(page = 1) {
+    const response = await authFetch(`message/chats/?page=${page}`);
+    if (response.status !== 200) return [];
+    return (await response.json()).map((c) => formatUser(c));
+}
+
+
+export async function sendMessage(recipientId, content, file) {}

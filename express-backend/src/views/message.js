@@ -10,7 +10,7 @@ import {
     excludeFieldsFromObject,
     formatFileFields,
     getPrivateFileDirectory,
-    paginate
+    paginate,
 } from "../helpers.js";
 
 const router = express.Router();
@@ -22,6 +22,7 @@ router.post("/", validator.messageValidator, async (req, res) => {
                 { requestedById: req.user.id, acceptedById: req.params.id },
                 { requestedById: req.params.id, acceptedById: req.user.id },
             ],
+            acceptedAt: { not: null },
         },
     });
 
@@ -47,38 +48,66 @@ router.post("/", validator.messageValidator, async (req, res) => {
 });
 
 router.get("/chats", async (req, res) => {
-    const chats =
-        (await prisma.message.findMany({
-            distinct: ["senderId", "recipientId"],
-            where: {
-                OR: [{ senderId: req.user.id }, { recipientId: req.user.id }],
-            },
-            orderBy: {
-                sentAt: "desc",
-            },
-            ...paginate(req),
-        })) || [];
+    const result = await prisma.$queryRaw`
+        WITH
+            "ChatTable" AS (
+                SELECT
+                    "recipientId" AS "friendId",
+                    "sentAt",
+                    CONCAT (
+                        'You: ', 
+                        CASE 
+                            WHEN "content" IS NULL
+                                THEN '📎 Attachment'
+                            ELSE 
+                                "content"
+                        END
+                    ) as "content",
+                    false as "attention"
+                FROM
+                    "Message"
+                WHERE
+                    "senderId" = ${req.user.id}
+                UNION
+                SELECT
+                    "senderId" AS "friendId",
+                    "sentAt",
+                    CASE 
+                        WHEN "content" IS NULL 
+                            THEN '📎 Attachment'
+                        ELSE
+                            "content" 
+                    END as "content",
+                    NOT "read" as "attention"
+                FROM
+                    "Message"
+                WHERE
+                    "recipientId" = ${req.user.id}
+            )
+        SELECT
+            "friendId",
+            "firstName",
+            "lastName",
+            "profileImage",
+            "sentAt",
+            "content",
+            "attention"
+        FROM
+            "ChatTable" INNER JOIN "User" ON "ChatTable"."friendId" = "User"."id"
+        WHERE
+            ("friendId", "sentAt") IN (
+                SELECT
+                    "friendId",
+                    MAX("sentAt")
+                FROM
+                    "ChatTable"
+                GROUP BY
+                    "friendId"
+            )
+        ORDER BY "sentAt" DESC
+    `;
 
-    for (let i = 0; i < chats.length; i++) {
-        chats[i].content = chats[i].content || "Sent an attachment";
-
-        if (chats[i].senderId === req.user.id) {
-            chats[i].id = chats[i].recipientId;
-            chats[i].attention = false;
-        } else {
-            chats[i].id = chats[i].senderId;
-            chats[i].attention = !chats[i].read;
-        }
-
-        chats[i] = excludeFieldsFromObject(chats[i], [
-            "file",
-            "senderId",
-            "recipientId",
-            "read",
-        ]);
-    }
-
-    return res.json(chats);
+    return res.json(result);
 });
 
 router.get("/:id", async (req, res) => {
@@ -87,22 +116,22 @@ router.get("/:id", async (req, res) => {
         data: { read: true },
     });
 
-    const messages = (
-        (await prisma.message.findMany({
-            where: {
-                OR: [
-                    { senderId: req.user.id, recipientId: req.params.id },
-                    { senderId: req.params.id, recipientId: req.user.id },
-                ],
-            },
-            orderBy: {
-                sentAt: "desc",
-            },
-            ...paginate(req)
-        })) || []
-    ).map((m) => formatFileFields(m, ["file"], true));
-
-    return res.json(await Promise.all(messages));
+    return res.json(
+        (
+            (await prisma.message.findMany({
+                where: {
+                    OR: [
+                        { senderId: req.user.id, recipientId: req.params.id },
+                        { senderId: req.params.id, recipientId: req.user.id },
+                    ],
+                },
+                orderBy: {
+                    sentAt: "desc",
+                },
+                ...paginate(req),
+            })) || []
+        ).map((m) => formatFileFields(m, ["file"], true))
+    );
 });
 
 export default router;

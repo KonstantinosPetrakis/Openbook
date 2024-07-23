@@ -207,24 +207,24 @@ export async function main() {
     assertEqual(await deleteComment(tokens[1], comments[2]), 403);
 
     // Check feed from a user (empty)
-    assertEqual((await getFeed(tokens[0])).length, 0);
+    assertEqual((await getFeed(tokens[3])).length, 0);
 
     // Create 3 posts from 3 different users
     for (let i = 3; i < 6; i++) {
         await createPost(tokens[i], "Hello World");
     }
     // Add 2 of the 3 users from another user
-    await addFriend(tokens[3], userIds[4]);
-    await addFriend(tokens[3], userIds[5]);
-    await addFriend(tokens[4], userIds[3]);
-    await addFriend(tokens[5], userIds[3]);
+    await addFriend(tokens[6], userIds[4]);
+    await addFriend(tokens[6], userIds[5]);
+    await addFriend(tokens[4], userIds[6]);
+    await addFriend(tokens[5], userIds[6]);
 
     // Check the feed from that user
-    assertEqual((await getFeed(tokens[3])).length, 2);
+    assertEqual((await getFeed(tokens[6])).length, 2);
 
     // Then make one of the friends create a new post
     await createPost(tokens[4], "Hello World");
 
     // Check the feed again (+=1 post)
-    assertEqual((await getFeed(tokens[3])).length, 3);
+    assertEqual((await getFeed(tokens[6])).length, 3);
 }

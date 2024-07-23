@@ -56,10 +56,10 @@ export default function Menu() {
                         </Link>
                     </li>
                     <li>
-                        <button className="simple-button">
+                        <Link className="simple-button" to={"/chat"}>
                             <i className="bi bi-chat-left-text"></i>
                             <div> Chat </div>
-                        </button>
+                        </Link>
                     </li>
                     <li>
                         <button

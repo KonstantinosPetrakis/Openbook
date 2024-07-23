@@ -1,5 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import Loader from "../components/Loader";
+import PostList from "../components/PostList";
 import { UserContext } from "../contexts";
 import { getUser } from "../network";
 import { camelToTitle } from "../helpers";
@@ -86,7 +88,15 @@ export default function Profile() {
                                 </div>
                             ))}
                     </div>
-                    <div className="transparent posts">Posts go here</div>
+                    <div className="posts">
+                        <Loader
+                            key={user.id}
+                            Renderer={PostList}
+                            fetchFunction={(p) =>
+                                sessionUser.getPostsOfUser(user.id, p)
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         )

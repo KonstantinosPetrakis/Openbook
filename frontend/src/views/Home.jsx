@@ -1,20 +1,15 @@
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import { UserContext } from "../contexts";
+import Loader from "../components/Loader";
+import PostList from "../components/PostList";
 
 function Home() {
     const user = useContext(UserContext);
-    const [friends, setFriends] = useState([]);
-
-    useEffect(() => {
-        (async () => setFriends(await user.getFriends()))();
-    }, [user]);
 
     return (
-        <>
-            <h2> This is the homepage! </h2>
-            {JSON.stringify(friends, null, 2)}
-        </>
+        <div className="container-lg home">
+            <Loader Renderer={PostList} fetchFunction={user.getFeed} />
+        </div>
     );
 }
 

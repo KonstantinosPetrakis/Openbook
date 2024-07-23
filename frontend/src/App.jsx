@@ -13,6 +13,7 @@ import Profile from "./views/Profile";
 import Post from "./views/Post";
 import Me from "./views/Me";
 import NotFound from "./views/NotFound";
+import Chat from "./views/Chat";
 import "./styles/App.css";
 
 function App() {
@@ -56,6 +57,7 @@ function ApplicationRoutes() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile/:id" element={<Profile />} />
             <Route path="/post/:id" element={<Post />} />
+            <Route path="/chat/:id?" element={<Chat />} />
             <Route path="/me" element={<Me />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
