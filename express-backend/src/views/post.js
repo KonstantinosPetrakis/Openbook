@@ -168,7 +168,9 @@ router.get("/feed", async (req, res) => {
         (
             (await prisma.post.findMany({
                 where: {
-                    authorId: { in: await friendsOf(req.user) },
+                    authorId: {
+                        in: [...(await friendsOf(req.user)), req.user.id],
+                    },
                 },
                 orderBy: {
                     postedAt: "desc",

@@ -3,6 +3,7 @@ import "../styles/Loader.css";
 
 export default function Loader({
     Renderer,
+    DefaultRenderer = () => "",
     fetchFunction,
     reverse = false,
     className = "",
@@ -36,30 +37,22 @@ export default function Loader({
             setData((data) => {
                 const dataIds = data.map((d) => d.id);
                 const filteredD = d.filter((d) => !dataIds.includes(d.id));
-                return reverse
-                    ? [...filteredD, ...data]
-                    : [...data, ...filteredD];
+                return [...data, ...filteredD];
             });
         })();
     }, [fetchFunction, page, reverse]);
 
-    return (
-        !!data.length && (
-            <div className={`loader ${className}`}>
-                {reverse && (
-                    <div ref={obs}>
-                        {/* The br is required to trigger observer correctly */}
-                        <br />
-                    </div>
-                )}
-                <Renderer data={data} setData={setData} onClick={onClick} />
-                {!reverse && (
-                    <div ref={obs}>
-                        {/* The br is required to trigger observer correctly */}
-                        <br />
-                    </div>
-                )}
+    if (!data.length)
+        return (
+            <div className={className}>
+                <DefaultRenderer />
             </div>
-        )
+        );
+
+    return (
+        <div className={`loader ${reverse ? "reverse" : ""} ${className}`}>
+            <Renderer data={data} setData={setData} onClick={onClick} />
+            <div className="observer" ref={obs}></div>
+        </div>
     );
 }

@@ -1,5 +1,7 @@
 import express from "express";
 import { getPrivateFileDirectory, handleVideoStream } from "../helpers.js";
+import { VIDEO_EXTENSIONS } from "../validators/helpers.js";
+import fs from "fs/promises";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();

@@ -89,6 +89,7 @@ router.get("/chats", async (req, res) => {
             "firstName",
             "lastName",
             "profileImage",
+            "lastActive",
             "sentAt",
             "content",
             "attention"

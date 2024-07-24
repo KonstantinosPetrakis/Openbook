@@ -100,7 +100,7 @@ export async function registerUser(email, firstName, lastName, password) {
         lastName,
         password,
     });
-    return response.status == 201 ? (await response.json()).id : null;
+    return response?.status == 201 ? (await response.json()).id : null;
 }
 
 /**
@@ -111,7 +111,7 @@ export async function registerUser(email, firstName, lastName, password) {
  */
 export async function loginUser(email, password) {
     const response = await post("user/login", { email, password });
-    return response.status == 200 ? await response.json() : null;
+    return response?.status == 200 ? await response.json() : null;
 }
 
 /**
@@ -139,7 +139,7 @@ export async function updateUser(data) {
  */
 export async function getUser(id) {
     const response = await authFetch(`user/${id}`);
-    if (response.status !== 200) return null;
+    if (response?.status !== 200) return null;
     return formatUser(await response.json());
 }
 
@@ -152,7 +152,7 @@ export async function getUser(id) {
 export async function searchUser(query, page = 1) {
     if (!query) return [];
     const response = await authFetch(`user/search/${query}?page=${page}`);
-    if (response.status !== 200) return [];
+    if (response?.status !== 200) return [];
     return (await response.json()).map(formatUser);
 }
 
@@ -163,7 +163,7 @@ export async function searchUser(query, page = 1) {
  */
 export async function addFriend(userId) {
     const response = await authFetch(`user/addFriend/${userId}`, "POST");
-    return [200, 201].includes(response.status);
+    return [200, 201].includes(response?.status);
 }
 
 /**
@@ -173,7 +173,7 @@ export async function addFriend(userId) {
  */
 export async function deleteFriend(userId) {
     const response = await authFetch(`user/deleteFriend/${userId}`, "DELETE");
-    return response.status === 200;
+    return response?.status === 200;
 }
 
 /**
@@ -183,7 +183,7 @@ export async function deleteFriend(userId) {
  */
 export async function getNotifications(page = 1) {
     const response = await authFetch(`notification/?page=${page}`);
-    if (response.status !== 200) return [];
+    if (response?.status !== 200) return [];
 
     return (await response.json()).map((n) => {
         n.data = formatUser(n.data);
@@ -198,7 +198,7 @@ export async function getNotifications(page = 1) {
  */
 export async function readNotification(notificationId) {
     const response = await authPatch(`notification/read/${notificationId}`);
-    return response.status === 200;
+    return response?.status === 200;
 }
 
 /**
@@ -207,7 +207,7 @@ export async function readNotification(notificationId) {
  */
 export async function getUnreadNotificationCount() {
     const response = await authFetch("notification/count");
-    return response.status === 200 ? await response.json() : 0;
+    return response?.status === 200 ? await response.json() : 0;
 }
 
 /**
@@ -216,7 +216,7 @@ export async function getUnreadNotificationCount() {
  */
 export async function getFriends() {
     const response = await authFetch("user/friends");
-    return response.status === 200 ? await response.json() : [];
+    return response?.status === 200 ? await response.json() : [];
 }
 
 /**
@@ -252,7 +252,7 @@ export async function createPost(content, files) {
  */
 export async function getPost(id) {
     const response = await authFetch(`post/${id}`);
-    if (response.status !== 200) return null;
+    if (response?.status !== 200) return null;
     const data = await response.json();
     data.author = formatUser(data.author);
     data.files = data.files.map(formatServerSrc);
@@ -267,7 +267,7 @@ export async function getPost(id) {
  */
 export async function getPostComments(postId, page = 1) {
     const response = await authFetch(`/post/${postId}/comments?page=${page}`);
-    if (response.status !== 200) return [];
+    if (response?.status !== 200) return [];
     return (await response.json()).map((c) => {
         c.author = formatUser(c.author);
         c.file = formatServerSrc(c.file);
@@ -282,7 +282,7 @@ export async function getPostComments(postId, page = 1) {
  */
 export async function likePost(id) {
     const response = await authFetch(`post/like/${id}`, "POST");
-    return [200, 201].includes(response.status) || null;
+    return [200, 201].includes(response?.status) || null;
 }
 
 /**
@@ -299,7 +299,7 @@ export async function commentPost(postId, content = "", file = null) {
     form.append("content", content);
     if (file) form.append("file", file);
     const response = await authFetch(`post/comment/${postId}`, "POST", form);
-    return response.status === 201 ? (await response.json()).id : null;
+    return response?.status === 201 ? (await response.json()).id : null;
 }
 
 /**
@@ -309,7 +309,7 @@ export async function commentPost(postId, content = "", file = null) {
  */
 export async function deletePost(postId) {
     const response = await authFetch(`post/${postId}`, "DELETE");
-    return response.status === 200;
+    return response?.status === 200;
 }
 
 /**
@@ -319,7 +319,7 @@ export async function deletePost(postId) {
  */
 export async function deleteComment(commentId) {
     const response = await authFetch(`post/comment/${commentId}`, "DELETE");
-    return response.status === 200;
+    return response?.status === 200;
 }
 
 /**
@@ -329,7 +329,7 @@ export async function deleteComment(commentId) {
  */
 export async function getFeed(page = 1) {
     const response = await authFetch(`post/feed?page=${page}`);
-    if (response.status !== 200) return [];
+    if (response?.status !== 200) return [];
     return (await response.json()).map((p) => {
         p.author = formatUser(p.author);
         p.files = p.files.map(formatServerSrc);
@@ -344,14 +344,13 @@ export async function getFeed(page = 1) {
  */
 export async function getPostsOfUser(userId, page = 1) {
     const response = await authFetch(`post/ofUser/${userId}?page=${page}`);
-    if (response.status !== 200) return [];
+    if (response?.status !== 200) return [];
     return (await response.json()).map((p) => {
         p.author = formatUser(p.author);
         p.files = p.files.map(formatServerSrc);
         return p;
     });
 }
-
 
 /**
  * This function gets the last chats the session user had.
@@ -360,9 +359,35 @@ export async function getPostsOfUser(userId, page = 1) {
  */
 export async function getChats(page = 1) {
     const response = await authFetch(`message/chats/?page=${page}`);
-    if (response.status !== 200) return [];
+    if (response?.status !== 200) return [];
     return (await response.json()).map((c) => formatUser(c));
 }
 
+/**
+ * This function sends a message to a user.
+ * @param {string} recipientId the id of the user to send the message to.
+ * @param {string} content the content of the message. Default is an empty string.
+ * @param {File | null} file a file to attach to the message. Default is null.
+ * @returns {Promise<boolean>} true if the message was sent, false otherwise.
+ */
+export async function sendMessage(recipientId, content = "", file = null) {
+    const form = new FormData();
+    form.append("recipientId", recipientId);
+    if (content) form.append("content", content);
+    if (file) form.append("file", file);
+    const response = await authFetch("message", "POST", form);
+    return response?.status === 201;
+}
 
-export async function sendMessage(recipientId, content, file) {}
+export async function getMessages(recipientId, page = 1) {
+    const response = await authFetch(`message/${recipientId}?page=${page}`);
+    if (response?.status !== 200) return [];
+    const data =  await response.json();
+    return await Promise.all(data.map(async (m) => {
+        if (m.file) {
+            const r = await authFetch(m.file);
+            m.file = URL.createObjectURL(await r.blob());
+        }
+        return m;
+    }));
+}

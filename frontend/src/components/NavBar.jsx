@@ -18,7 +18,7 @@ export default function NavBar() {
                 <Link to="/">
                     <img className="logo" src="/images/logo.png" alt="logo" />
                 </Link>
-                {searchActive && (
+                {searchActive && searchQuery && (
                     <Loader
                         key={searchQuery}
                         onClick={() => setSearchActive(false)}

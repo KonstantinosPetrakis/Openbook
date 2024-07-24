@@ -25,8 +25,9 @@ export async function checkToken(req, res, next) {
             const payload = jwt.verify(token, process.env.SECRET_KEY || "");
             if (!isValidPayload(payload)) return res.sendStatus(401);
 
-            req.user = await prisma.user.findUnique({
+            req.user = await prisma.user.update({
                 where: { id: payload.id },
+                data: { lastActive: new Date() },
             });
 
             if (!req.user) return res.sendStatus(401);

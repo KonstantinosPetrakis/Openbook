@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import PostList from "../components/PostList";
 import { UserContext } from "../contexts";
-import { getUser } from "../network";
 import { camelToTitle } from "../helpers";
 import { PROFILE_ICONS, GENDER, RELATIONSHIP_STATUS } from "../constants";
 import "../styles/Profile.css";
@@ -17,13 +16,13 @@ export default function Profile() {
 
     useEffect(() => {
         (async () => {
-            const u = await getUser(id);
+            const u = await sessionUser.getUser(id);
             if (!u) navigate("/not-found");
             u.relationshipStatus = RELATIONSHIP_STATUS[u.relationshipStatus];
             u.gender = GENDER[u.gender];
             setUser(u);
         })();
-    }, [navigate, id, rerenderSwitch]);
+    }, [navigate, id, rerenderSwitch, sessionUser]);
 
     const positiveFunction = async () =>
         (await sessionUser.addFriend(user.id)) &&
@@ -59,14 +58,26 @@ export default function Profile() {
                                 Edit Profile
                             </Link>
                         ) : (
-                            <button
-                                onClick={
-                                    profileControls[user.friendshipStatus].func
-                                }
-                                className="transparent-button"
-                            >
-                                {profileControls[user.friendshipStatus].text}
-                            </button>
+                            <>
+                                <button
+                                    onClick={
+                                        profileControls[user.friendshipStatus]
+                                            .func
+                                    }
+                                    className="transparent-button"
+                                >
+                                    {
+                                        profileControls[user.friendshipStatus]
+                                            .text
+                                    }
+                                </button>
+                                <Link
+                                    className="transparent-button"
+                                    to={`/chat/${user.id}`}
+                                >
+                                    Message
+                                </Link>
+                            </>
                         )}
                     </div>
                 </div>

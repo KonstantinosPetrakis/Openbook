@@ -45,9 +45,7 @@ export async function onUserConnected(socket) {
  */
 export function updateUserForNewMessage(userId) {
     const socket = socketUserMap[userId];
-    if (socket) {
-        socket.emit("NEW_MESSAGE");
-    }
+    if (socket) socket.emit("NEW_MESSAGE");
 }
 
 /**
@@ -57,7 +55,5 @@ export function updateUserForNewMessage(userId) {
  */
 export function updateUserForNewNotification(userId) {
     const socket = socketUserMap[userId];
-    if (socket) {
-        socket.emit("NEW_NOTIFICATION");
-    }
+    if (socket) socket.emit("NEW_NOTIFICATION");
 }

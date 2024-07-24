@@ -4,3 +4,11 @@
     height: 100%;
     overflow-y: auto;
 }
+
+.loader.reverse {
+    flex-direction: column-reverse;
+}
+
+.observer {
+    padding: 1rem;
+}

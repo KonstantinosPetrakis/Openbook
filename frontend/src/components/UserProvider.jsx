@@ -26,6 +26,9 @@ import {
     deleteComment,
     getFeed,
     getPostsOfUser,
+    getChats,
+    sendMessage,
+    getMessages,
 } from "../network";
 
 export default function UserProvider({ children }) {
@@ -53,6 +56,7 @@ export default function UserProvider({ children }) {
             isLoggedIn: () => {
                 return !!localStorage.getItem("user");
             },
+            getUser,
             getFriends,
             addFriend,
             deleteFriend,
@@ -68,6 +72,9 @@ export default function UserProvider({ children }) {
             deleteComment,
             getFeed,
             getPostsOfUser,
+            getChats,
+            sendMessage,
+            getMessages,
         };
 
         const refreshUser = async () => {

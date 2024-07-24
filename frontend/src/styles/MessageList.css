@@ -1,0 +1,24 @@
+.message-list {
+    list-style: none;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    margin: 0.25rem 0;
+}
+
+.message .file-gallery img,
+.message .file-gallery video {
+    max-height: 200px;
+}
+
+.message.from-me {
+    align-self: flex-end;
+}

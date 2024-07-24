@@ -62,6 +62,8 @@ export function timeDifference(d1, d2 = new Date()) {
     let rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
     let elapsed = d1 - d2;
 
+    if (Math.abs(elapsed) < units.minute) return rtf.format(0, "second");
+
     for (let u in units)
         if (Math.abs(elapsed) > units[u] || u == "second")
             return rtf.format(Math.round(elapsed / units[u]), u);
