@@ -3,6 +3,6 @@
     padding: 0;
 }
 
-.post-list li {
+.post-list > li {
     margin-bottom: 2rem;
 }

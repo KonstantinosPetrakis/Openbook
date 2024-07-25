@@ -3,3 +3,28 @@
     padding: 0;
 }
 
+.chat-friend-list li {
+    padding: 0.5rem;
+    border-radius: 10px;
+    margin: .5rem;
+}
+
+.chat-friend-list li.active {
+    background-color: #16555941;
+}
+
+.chat-friend-list li:hover {
+    filter: brightness(1.2);
+}
+
+.chat-friend-list a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chat-friend-list img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}

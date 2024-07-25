@@ -1,6 +1,6 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { UserContext, RealTimeContext, notificationContext } from "../contexts";
+import { UserContext, RealTimeContext } from "../contexts";
 import OffCanvas from "../components/OffCanvas";
 import CreatePost from "./CreatePost";
 import NotificationList from "./NotificationList";
@@ -10,34 +10,19 @@ import "../styles/Menu.css";
 export default function Menu() {
     const user = useContext(UserContext);
     const realTime = useContext(RealTimeContext);
-    const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
     const [notificationListActive, setNotificationListActive] = useState(false);
     const [createPostActive, setCreatePostActive] = useState(false);
-    const [refreshNotification, setRefreshNotification] = useState(false);
-    const alertAudio = useRef(null);
+    const [notificationRefresh, setNotificationRefresh] = useState(false);
 
     useEffect(() => {
-        if (!realTime) return;
-
-        const refNot = () => {
-            setRefreshNotification((prev) => !prev);
-            alertAudio.current.play();
-        };
-        realTime.onNewNotification(refNot);
-        return () => realTime.offNewNotification(refNot);
+        const onNewNotification = () => setNotificationRefresh((r) => !r);
+        realTime.onNewNotification(onNewNotification);
+        return () => realTime.offNewNotification(onNewNotification);
     }, [realTime]);
-
-    useEffect(() => {
-        (async () => {
-            if (!user.isLoggedIn()) return;
-            setUnreadNotificationCount(await user.getUnreadNotificationCount());
-        })();
-    }, [user, refreshNotification]);
 
     return (
         user.isLoggedIn() && (
             <nav className="menu">
-                <audio ref={alertAudio} src="/audio/alert.mp3"></audio>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 1440 320"
@@ -56,7 +41,15 @@ export default function Menu() {
                         </Link>
                     </li>
                     <li>
-                        <Link className="simple-button" to={"/chat"}>
+                        <Link
+                            className="message-button simple-button"
+                            to={"/chat"}
+                        >
+                            {!!realTime.unreadMessageCount && (
+                                <div className="pill">
+                                    {realTime.unreadMessageCount}
+                                </div>
+                            )}
                             <i className="bi bi-chat-left-text"></i>
                             <div> Chat </div>
                         </Link>
@@ -76,33 +69,27 @@ export default function Menu() {
                             <CreatePost />
                         </OffCanvas>
                     </li>
-                    <li
-                        key={refreshNotification}
-                        className="notification-button"
-                    >
-                        <notificationContext.Provider
-                            value={setUnreadNotificationCount}
-                        >
-                            <Loader
-                                className={`list notification-loader ${
-                                    notificationListActive ? "active" : ""
-                                }`}
-                                Renderer={NotificationList}
-                                fetchFunction={user.getNotifications}
-                                onClick={() => setNotificationListActive(false)}
-                            />
-                        </notificationContext.Provider>
-                        {!!unreadNotificationCount && (
-                            <div className="pill">
-                                {unreadNotificationCount}
-                            </div>
-                        )}
+                    <li>
+                        <Loader
+                            key={notificationRefresh}
+                            className={`list notification-loader ${
+                                notificationListActive ? "active" : ""
+                            }`}
+                            Renderer={NotificationList}
+                            fetchFunction={user.getNotifications}
+                            onClick={() => setNotificationListActive(false)}
+                        />
                         <button
-                            className="simple-button"
+                            className="notification-button simple-button"
                             onClick={() => setNotificationListActive((c) => !c)}
                         >
                             <i className="bi bi-bell"></i>
                             <div> Notifications </div>
+                            {!!realTime.unreadNotificationCount && (
+                                <div className="pill">
+                                    {realTime.unreadNotificationCount}
+                                </div>
+                            )}
                         </button>
                     </li>
                     <li>

@@ -8,7 +8,16 @@ function Home() {
 
     return (
         <div className="container-lg home">
-            <Loader Renderer={PostList} fetchFunction={user.getFeed} />
+            <Loader
+                Renderer={PostList}
+                DefaultRenderer={() => (
+                    <p>
+                        Your feed is empty! Create new friends to get an
+                        interesting feed!
+                    </p>
+                )}
+                fetchFunction={user.getFeed}
+            />
         </div>
     );
 }

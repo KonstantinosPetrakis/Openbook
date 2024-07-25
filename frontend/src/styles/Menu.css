@@ -26,6 +26,7 @@
 }
 
 .menu > ul > li {
+    position: relative;
     text-align: center;
     width: 100%;
 }
@@ -51,8 +52,12 @@
     font-size: 2.3rem;
 }
 
+.message-button,
 .notification-button {
+    display: block;
     position: relative;
+    height: 100%;
+    width: 5rem;
 }
 
 .menu .notification-loader {

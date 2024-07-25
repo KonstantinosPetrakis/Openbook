@@ -275,6 +275,8 @@ textarea:focus-visible {
 .pill {
     display: inline-block;
     position: absolute;
+    top: -10px;
+    left: 0;
     background: #1655594b;
     width: 1.5rem;
     height: 1.5rem;

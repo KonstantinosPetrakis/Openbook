@@ -1,12 +1,12 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext, notificationContext } from "../contexts";
+import { UserContext, RealTimeContext } from "../contexts";
 import { timeDifference } from "../helpers";
 import "../styles/NotificationList.css";
 
 export default function NotificationList({ data, setData, onClick }) {
+    const realTime = useContext(RealTimeContext);
     const user = useContext(UserContext);
-    const setUnreadNotificationCount = useContext(notificationContext);
 
     const componentMap = {
         FRIEND_REQUEST: FriendRequestNotification,
@@ -21,7 +21,7 @@ export default function NotificationList({ data, setData, onClick }) {
         const dataCopy = [...data];
         dataCopy.find((n) => n.id === notification.id).read = true;
         setData(dataCopy);
-        setUnreadNotificationCount((prev) => prev - 1);
+        realTime.setUnreadNotificationCount((prev) => prev - 1);
     }
 
     return (

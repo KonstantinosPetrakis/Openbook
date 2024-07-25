@@ -44,7 +44,7 @@ export default function Loader({
 
     if (!data.length)
         return (
-            <div className={className}>
+            <div className={`loader ${className}`}>
                 <DefaultRenderer />
             </div>
         );

@@ -29,6 +29,7 @@ import {
     getChats,
     sendMessage,
     getMessages,
+    getUnreadMessageCount
 } from "../network";
 
 export default function UserProvider({ children }) {
@@ -75,6 +76,7 @@ export default function UserProvider({ children }) {
             getChats,
             sendMessage,
             getMessages,
+            getUnreadMessageCount
         };
 
         const refreshUser = async () => {

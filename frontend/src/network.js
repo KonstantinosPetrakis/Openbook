@@ -27,7 +27,7 @@ function post(url, data) {
  * @param {object} headers the headers to send in the request.
  * @returns {Promise<Response> | null} the response of the request or null if the token is not stored.
  */
-function authFetch(url, method = "GET", data = {}, headers = {}) {
+export function authFetch(url, method = "GET", data = {}, headers = {}) {
     const body =
         method === "GET"
             ? undefined
@@ -364,6 +364,17 @@ export async function getChats(page = 1) {
 }
 
 /**
+ * This function fetches a private file from the server.
+ * @param {string} fileUrl the url of the file to fetch.
+ * @returns {Promise<string | null>} the url of the file in localhost.
+ */
+export async function getPrivateFile(fileUrl) {
+    if (!fileUrl) return null;
+    const response = await authFetch(fileUrl);
+    return URL.createObjectURL(await response.blob());
+}
+
+/**
  * This function sends a message to a user.
  * @param {string} recipientId the id of the user to send the message to.
  * @param {string} content the content of the message. Default is an empty string.
@@ -379,15 +390,29 @@ export async function sendMessage(recipientId, content = "", file = null) {
     return response?.status === 201;
 }
 
-export async function getMessages(recipientId, page = 1) {
-    const response = await authFetch(`message/${recipientId}?page=${page}`);
+/**
+ * This function gets the messages of a chat.
+ * @param {string} friendId the id of the friend that the user has a chat with.
+ * @param {number} page the page to get, default is 1.
+ * @returns 
+ */
+export async function getMessages(friendId, page = 1) {
+    const response = await authFetch(`message/${friendId}?page=${page}`);
     if (response?.status !== 200) return [];
-    const data =  await response.json();
-    return await Promise.all(data.map(async (m) => {
-        if (m.file) {
-            const r = await authFetch(m.file);
-            m.file = URL.createObjectURL(await r.blob());
-        }
-        return m;
-    }));
+    const data = await response.json();
+    return await Promise.all(
+        data.map(async (m) => {
+            m.file = await getPrivateFile(m.file);
+            return m;
+        })
+    );
+}
+
+/**
+ * This function gets the count of unread messages.
+ * @returns {Promise<number>} the count of unread messages.
+ */
+export async function getUnreadMessageCount() {
+    const response = await authFetch("message/unread");
+    return response?.status === 200 ? (await response.json()).unread : 0;
 }

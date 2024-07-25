@@ -1,6 +1,7 @@
 import { Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-
+import fs from "fs/promises";
+import { getPrivateFileDirectory } from "./helpers.js";
 import prisma from "./db.js";
 
 const socketUserMap = {};
@@ -39,13 +40,12 @@ export async function onUserConnected(socket) {
 }
 
 /**
- * This function updates the user that a new message has been received so
- * they can pull the new messages.
- * @param {string} userId the user id.
+ * This function sends a message to the user.
+ * @param {object} messageData the message data.
  */
-export function updateUserForNewMessage(userId) {
-    const socket = socketUserMap[userId];
-    if (socket) socket.emit("NEW_MESSAGE");
+export async function updateUserForNewMessage(messageData) {
+    const socket = socketUserMap[messageData.recipientId];
+    if (socket) socket.emit("NEW_MESSAGE", messageData);
 }
 
 /**

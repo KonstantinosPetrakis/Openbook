@@ -42,8 +42,13 @@ router.post("/", validator.messageValidator, async (req, res) => {
         messageData.file = fileName;
     }
 
-    await prisma.message.create({ data: messageData });
-    updateUserForNewMessage(messageData.recipientId);
+    updateUserForNewMessage(
+        formatFileFields(
+            await prisma.message.create({ data: messageData }),
+            ["file"],
+            true
+        )
+    );
     return res.sendStatus(201);
 });
 
@@ -57,7 +62,7 @@ router.get("/chats", async (req, res) => {
                     CONCAT (
                         'You: ', 
                         CASE 
-                            WHEN "content" IS NULL
+                            WHEN "content" = ''
                                 THEN '📎 Attachment'
                             ELSE 
                                 "content"
@@ -73,7 +78,7 @@ router.get("/chats", async (req, res) => {
                     "senderId" AS "friendId",
                     "sentAt",
                     CASE 
-                        WHEN "content" IS NULL 
+                        WHEN "content" = '' 
                             THEN '📎 Attachment'
                         ELSE
                             "content" 
@@ -109,6 +114,13 @@ router.get("/chats", async (req, res) => {
     `;
 
     return res.json(result);
+});
+
+router.get("/unread", async (req, res) => {
+    const result = await prisma.message.count({
+        where: { recipientId: req.user.id, read: false },
+    });
+    return res.json({ unread: result });
 });
 
 router.get("/:id", async (req, res) => {

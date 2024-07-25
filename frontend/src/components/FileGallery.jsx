@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { authFetch } from "../network";
 import "../styles/FileGallery.css";
 
 export default function FileGallery({ files }) {
@@ -27,7 +28,10 @@ export default function FileGallery({ files }) {
             setFilesWithTypes(
                 await Promise.all(
                     files.map(async (f) => {
-                        const blob = await (await fetch(f)).blob();
+                        const fetchFunc = f.includes("private")
+                            ? authFetch
+                            : fetch;
+                        const blob = await (await fetchFunc(f)).blob();
                         const type = blob.type.startsWith("image")
                             ? "image"
                             : "video";
