@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
-const SERVER = "http://localhost:3000";
-const API = `${SERVER}/api`;
+const SERVER = import.meta.env.VITE_SOCKET_ENDPOINT;
+const API = import.meta.env.VITE_API_ENDPOINT;
 
 /**
  * A wrapper around fetch to make a POST request.
@@ -394,7 +394,7 @@ export async function sendMessage(recipientId, content = "", file = null) {
  * This function gets the messages of a chat.
  * @param {string} friendId the id of the friend that the user has a chat with.
  * @param {number} page the page to get, default is 1.
- * @returns 
+ * @returns
  */
 export async function getMessages(friendId, page = 1) {
     const response = await authFetch(`message/${friendId}?page=${page}`);

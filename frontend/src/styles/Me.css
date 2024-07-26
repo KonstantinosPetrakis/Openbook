@@ -1,7 +1,9 @@
 .editable-names {
     display: flex;
     flex-wrap: wrap;
-    width: 100%;
+    justify-content: center;
+    gap: .5rem;
+    margin: .5rem;
 }
 
 .editable-names input {
