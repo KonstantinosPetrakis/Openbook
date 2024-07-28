@@ -117,10 +117,11 @@ router.get("/chats", async (req, res) => {
 });
 
 router.get("/unread", async (req, res) => {
-    const result = await prisma.message.count({
-        where: { recipientId: req.user.id, read: false },
-    });
-    return res.json({ unread: result });
+    return res.json(
+        await prisma.message.count({
+            where: { recipientId: req.user.id, read: false },
+        })
+    );
 });
 
 router.get("/:id", async (req, res) => {
