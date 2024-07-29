@@ -45,6 +45,7 @@ class UserUpdateIn(*CamelCaseModelSchema):
             "background_image",
             "joined_at",
             "last_active",
+            "channel"
         ]
         fields_optional = "__all__"
 
@@ -55,7 +56,7 @@ class UserUpdateIn(*CamelCaseModelSchema):
 class UserOutMulti(*CamelCaseModelSchema):
     class Meta:
         model = User
-        exclude = ["password"]
+        exclude = ["password", "channel"]
 
 
 class UserOutSingle(UserOutMulti):

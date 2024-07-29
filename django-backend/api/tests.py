@@ -461,3 +461,20 @@ class PostTest(TestCase):
         # Get feed
         self.assertEqual(self.get_feed(t1).json()["count"], 0)
         self.assertEqual(self.get_feed(t2).json()["count"], 0)
+
+
+class TestRealTime(TestCase):
+    def setUp(self):
+        self.u1 = register_request(*VALID_CREDENTIALS).json()["id"]
+        self.u2 = register_request(
+            "Jane", "Doe" "JaneDoe@example.com", VALID_PASSWORD
+        ).json()["id"]
+
+        self.t1 = login_request(*VALID_LOGIN).json()["token"]
+        self.t2 = login_request("JaneDoe@example.com", VALID_PASSWORD).json()["token"]
+
+        friend_request(self.t1, self.u2)
+        friend_request(self.t2, self.u1)
+
+    async def test_real_time(self):
+        pass

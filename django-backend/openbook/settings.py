@@ -14,6 +14,7 @@ ALLOWED_HOSTS = []
 
 # contrib.auth is required by templates, and templates are required for docs
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.staticfiles",
@@ -36,6 +37,19 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
+# Works as long it runs in a single container and with the channel names
+# being written to the db for different threads to read.
+# Not recommended for production, redis should be used instead.
+# More info: https://channels.readthedocs.io/en/latest/topics/channel_layers.html#in-memory-channel-layer
+# Postgres backend also looks good if extra container is too much:
+# https://github.com/danidee10/channels_postgres
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+
 ROOT_URLCONF = "openbook.urls"
 
 TEMPLATES = [
@@ -55,6 +69,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "openbook.wsgi.application"
+ASGI_APPLICATION = "openbook.asgi.application"
 
 DATABASES = {
     "default": {

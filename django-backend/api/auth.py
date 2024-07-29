@@ -1,3 +1,4 @@
+from typing import Literal
 import datetime
 
 import jwt
@@ -13,13 +14,17 @@ SECRET = settings.SECRET_KEY
 
 class AuthBearer(HttpBearer):
     def authenticate(self, request, token):
-        try:
-            payload = jwt.decode(token, SECRET, algorithms=["HS256"])
-            return User.objects.get(id=payload["userId"])
-        except jwt.ExpiredSignatureError:
-            return False
-        except jwt.InvalidTokenError:
-            return False
+        return authenticate(token)
+
+
+def authenticate(token) -> User | Literal[False]:
+    try:
+        payload = jwt.decode(token, SECRET, algorithms=["HS256"])
+        return User.objects.filter(id=payload["userId"]).first()
+    except jwt.ExpiredSignatureError:
+        return False
+    except jwt.InvalidTokenError:
+        return False
 
 
 def create_token(user: Model) -> str:

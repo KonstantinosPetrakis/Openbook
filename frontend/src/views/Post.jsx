@@ -8,7 +8,7 @@ export default function Post() {
     const user = useContext(UserContext);
     const navigate = useNavigate();
     const { id } = useParams();
-
+    
     useEffect(() => {
         (async () => {
             const p = await user.getPost(id);

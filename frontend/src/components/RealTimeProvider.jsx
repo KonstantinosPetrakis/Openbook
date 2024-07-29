@@ -17,7 +17,7 @@ export default function RealTimeProvider({ children }) {
     );
 
     const onNewMessage = useCallback(
-        (func) => socket && socket.on("NEW_MESSAGE", (func)),
+        (func) => socket && socket.on("NEW_MESSAGE", func),
         [socket]
     );
 
@@ -49,12 +49,14 @@ export default function RealTimeProvider({ children }) {
 
     // Reconnect socket when user changes
     useEffect(() => {
-        setSocket(createSocket());
-        return () =>
-            setSocket((s) => {
-                if (s && s.connected) s.close();
-                return null;
-            });
+        (async () => {
+            setSocket(await createSocket());
+            return () =>
+                setSocket((s) => {
+                    if (s && s.connected) s.close();
+                    return null;
+                });
+        })();
     }, [user]);
 
     // Get unread notification and message count when user changes

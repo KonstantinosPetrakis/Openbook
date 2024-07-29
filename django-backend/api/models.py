@@ -42,6 +42,7 @@ class User(models.Model):
     occupation = models.CharField(max_length=255, null=True, blank=True)
     education = models.CharField(max_length=255, null=True, blank=True)
     hobbies = models.CharField(max_length=255, null=True, blank=True)
+    channel = models.CharField(max_length=255, null=True, blank=True)
 
     def friends(self):
         friends_requested = Friendship.objects.filter(

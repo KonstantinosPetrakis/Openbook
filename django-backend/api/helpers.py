@@ -1,6 +1,9 @@
 from typing import Any, Literal, List, Dict
 import uuid
 
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from ninja import Schema, ModelSchema, FilterSchema, NinjaAPI, File, UploadedFile
 from django.db.models import ImageField
 from pydantic import UUID4
@@ -87,7 +90,13 @@ def create_notification(recipient_id: UUID4, type: str, data: Dict[str, Any]):
     data = {snake_case_to_camel_case(k): v for k, v in data.items()}
 
     Notification.objects.create(recipient_id=recipient_id, type=type, data=data)
-    # TODO: Send a push notification to the recipient.
+
+    if (channel := User.objects.filter(id=recipient_id).first().channel):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)(
+            channel,
+            {"type": "push", "event": "NEW_NOTIFICATION", "data": ""},
+        )
 
 
 def create_message(
@@ -110,4 +119,21 @@ def create_message(
         sender_id=sender_id, recipient_id=recipient_id, content=content
     )
     save_file(m.file, file, ["image", "video"])
-    # TODO: Send a push notification to the recipient.
+
+    if (channel := User.objects.filter(id=recipient_id).first().channel):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)(
+            channel,
+            {
+                "type": "push",
+                "event": "NEW_MESSAGE",
+                "data": {
+                    "id": str(m.id),
+                    "senderId": str(m.sender_id),
+                    "recipientId": str(m.recipient_id),
+                    "content": m.content,
+                    "file": m.file.url if m.file else None,
+                    "sentAt": str(m.sent_at),
+                },
+            },
+        )

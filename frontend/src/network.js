@@ -4,6 +4,8 @@ const SERVER = import.meta.env.VITE_SOCKET_ENDPOINT;
 const API = import.meta.env.VITE_API_ENDPOINT;
 const BACKEND_TYPE = import.meta.env.VITE_BACKEND_TYPE;
 
+const SOCKET_PYTHON_CALLBACKS = {};
+
 /**
  * A wrapper around fetch to make a POST request.
  * @param {string} url the url to send the request to.
@@ -68,7 +70,9 @@ function authPatch(url, data) {
  * @returns {string | null} the source of the file formatted correctly, null if the fileSrc is null or undefined.
  */
 function formatServerSrc(fileSrc) {
-    return fileSrc ? `${SERVER}/${fileSrc}` : null;
+    if (!fileSrc) return null;
+    if (fileSrc.startsWith("/")) fileSrc = fileSrc.substring(1);
+    return `${SERVER}/${fileSrc}`;
 }
 
 /**
@@ -224,10 +228,43 @@ export async function getFriends() {
  * This function creates a socket connection to the server.
  * @returns {Socket | null} the socket connection or null if the user is not logged in.
  */
-export function createSocket() {
-    if (BACKEND_TYPE === "python") return null; // Python backend does not support sockets yet.
+export async function createSocket() {
     const tokenStore = localStorage.getItem("user");
     if (!tokenStore) return null;
+
+    if (BACKEND_TYPE === "python") {
+        const socket = new WebSocket("ws://localhost:3000/ws");
+
+        return new Promise(
+            (resolve) =>
+                (socket.onopen = () => {
+                    socket.send(
+                        JSON.stringify({
+                            token: JSON.parse(tokenStore).token,
+                        })
+                    );
+
+                    socket.on = (event, func) => {
+                        const realHandler = (e) => {
+                            const data = JSON.parse(e.data);
+                            if (data.event === event) func(data.data);
+                        };
+
+                        SOCKET_PYTHON_CALLBACKS[func] = realHandler;
+                        socket.addEventListener("message", realHandler);
+                    };
+
+                    socket.off = (event, func) => {
+                        socket.removeEventListener(
+                            "message",
+                            SOCKET_PYTHON_CALLBACKS[func]
+                        );
+                    };
+
+                    resolve(socket);
+                })
+        );
+    }
 
     const token = JSON.parse(tokenStore).token;
     return token ? io(SERVER, { auth: { token } }) : null;

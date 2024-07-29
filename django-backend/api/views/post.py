@@ -146,7 +146,7 @@ def get_user_posts(request, id: UUID4):
     if not user:
         return 404, "User not found"
 
-    return Post.include_extra(Post.objects.filter(author=user), request.auth)
+    return Post.include_extra(Post.objects.filter(author=user).order_by("-posted_at"), request.auth)
 
 
 @router.get("/{id}", response={404: str, 200: PostOut})
