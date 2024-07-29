@@ -32,6 +32,7 @@ class UserLoginIn(*CamelCaseModelSchema):
 
 
 class UserLoginOut(*CamelCaseSchema):
+    id: UUID4
     token: str
 
 
@@ -101,6 +102,9 @@ class MessageOut(*CamelCaseModelSchema):
         model = Message
         fields = "__all__"
 
+    sender_id: UUID4
+    recipient_id: UUID4
+
 
 class ChatOut(*CamelCaseSchema):
     friend_id: UUID4
@@ -131,8 +135,8 @@ class PostOut(*CamelCaseModelSchema):
         model = Post
         fields = "__all__"
 
-    comment_count: int
-    like_count: int
+    comment_count: int = Field(None, serialization_alias="comments")
+    like_count: int = Field(None, serialization_alias="likes")
     author: UserOutMulti
     file: List[str] = Field(None, serialization_alias="files")
     liked: bool
@@ -148,3 +152,6 @@ class CommentOut(*CamelCaseModelSchema):
     class Meta:
         model = PostComment
         fields = "__all__"
+        exclude = ["post", "author"]
+
+    author: UserOutMulti

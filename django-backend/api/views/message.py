@@ -14,7 +14,7 @@ from api.schemas import MessageIn, MessageOut, ChatOut
 router = Router(tags=["message"])
 
 
-@router.post("/", response={201: str, 400: str, 403: str})
+@router.post("", response={201: str, 400: str, 403: str})
 def send_message(request, data: Form[MessageIn], file: File[UploadedFile] = None):
     friendship = Friendship.objects.filter(
         (Q(requested_by=request.auth, accepted_by=data.recipient_id))
@@ -38,6 +38,7 @@ def unread_messages_count(request):
 
 
 @router.get("/chats", response=List[ChatOut])
+@paginate
 def chats(request):
     with connection.cursor() as cursor:
         cursor.execute(

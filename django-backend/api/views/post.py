@@ -1,14 +1,13 @@
 from typing import List
 
-from django.contrib.postgres.expressions import ArraySubquery
 from ninja import Router, Form, File, UploadedFile
 from ninja.pagination import paginate
-from django.db.models import Count, OuterRef, Exists, Q
+from django.db.models import Q
 from pydantic import UUID4
 
-from api.helpers import save_file, create_notification
-from api.schemas import PostIn, PostOutMinimal, PostOut, CommentOutMinimal
 from api.models import User, Post, PostFile, Notification, PostLike, PostComment
+from api.schemas import PostIn, PostOutMinimal, PostOut, CommentOutMinimal, CommentOut
+from api.helpers import save_file, create_notification
 
 
 router = Router(tags=["post"])
@@ -45,25 +44,15 @@ def create_post(request, data: Form[PostIn], files: File[list[UploadedFile]] = [
     return 201, post
 
 
-@paginate
 @router.get("/feed", response={200: List[PostOut]})
+@paginate
 def get_feed(request):
-    return (
+    return Post.include_extra(
         Post.objects.filter(
             Q(author__id__in=request.auth.friends()) | Q(author=request.auth)
-        )
-        .annotate(
-            comment_count=Count("comments"),
-            like_count=Count("likes"),
-            liked=Exists(
-                PostLike.objects.filter(post=OuterRef("id"), liked_by=request.auth)
-            ),
-            file=ArraySubquery(
-                PostFile.objects.filter(post__id=OuterRef("id")).values("file")
-            ),
-        )
-        .select_related("author")
-    )
+        ),
+        request.auth,
+    ).order_by("-posted_at")
 
 
 @router.post("/like/{id}", response={404: str, 201: str, 200: str})
@@ -140,55 +129,32 @@ def delete_comment(request, id: UUID4):
     return 200, "Comment deleted"
 
 
+@router.get("/{id}/comments", response={404: str, 200: List[CommentOut]})
 @paginate
-@router.get("/{id}/comments", response={404: str, 200: List[PostOutMinimal]})
 def get_comments(request, id: UUID4):
     post = Post.objects.filter(id=id).first()
     if not post:
         return 404, "Post not found"
 
-    return PostComment.objects.filter(post=post)
+    return PostComment.objects.filter(post=post).order_by("-commented_at").select_related("author")
 
 
-@paginate
 @router.get("/ofUser/{id}", response={404: str, 200: List[PostOut]})
+@paginate
 def get_user_posts(request, id: UUID4):
     user = User.objects.filter(id=id).first()
     if not user:
         return 404, "User not found"
 
-    return (
-        Post.objects.filter(author=user)
-        .annotate(
-            comment_count=Count("comments"),
-            like_count=Count("likes"),
-            liked=Exists(
-                PostLike.objects.filter(post=OuterRef("id"), liked_by=request.auth)
-            ),
-            file=ArraySubquery(
-                PostFile.objects.filter(post__id=OuterRef("id")).values("file")
-            ),
-        )
-        .select_related("author")
-    )
+    return Post.include_extra(Post.objects.filter(author=user), request.auth)
 
 
 @router.get("/{id}", response={404: str, 200: PostOut})
 def get_post(request, id: UUID4):
-    return (
-        Post.objects.filter(id=id)
-        .annotate(
-            comment_count=Count("comments"),
-            like_count=Count("likes"),
-            liked=Exists(
-                PostLike.objects.filter(post=OuterRef("id"), liked_by=request.auth)
-            ),
-            file=ArraySubquery(
-                PostFile.objects.filter(post__id=OuterRef("id")).values("file")
-            ),
-        )
-        .first()
-    ) or (404, "Post not found")
+    return Post.include_extra(Post.objects.filter(id=id), request.auth).first() or (
+        404,
+        "Post not found",
+    )
 
 
 @router.delete("/{id}", response={200: str, 404: str})

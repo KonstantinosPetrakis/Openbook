@@ -40,7 +40,16 @@ def add_friend(request, id: UUID4):
         create_notification(
             accept_user.id,
             Notification.Types.FRIEND_REQUEST,
-            UserOutMulti.from_orm(request_user).json(),
+            {
+                "userId": str(request_user.id),
+                "firstName": request_user.first_name,
+                "lastName": request_user.last_name,
+                "profileImage": (
+                    request_user.profile_image.url
+                    if request_user.profile_image
+                    else None
+                ),
+            },
         )
         return 201, "Sent friend request"
 
@@ -56,7 +65,16 @@ def add_friend(request, id: UUID4):
         create_notification(
             friendship_entity.requested_by_id,
             Notification.Types.FRIEND_REQUEST_ACCEPTED,
-            UserOutMulti.from_orm(accept_user).json(),
+            {
+                "userId": str(request_user.id),
+                "firstName": request_user.first_name,
+                "lastName": request_user.last_name,
+                "profileImage": (
+                    request_user.profile_image.url
+                    if request_user.profile_image
+                    else None
+                ),
+            },
         )
         return 200, "Friend request accepted"
 

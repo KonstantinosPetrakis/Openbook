@@ -1,4 +1,5 @@
 from pathlib import Path
+from django.core.management.commands.runserver import Command as runserver
 from dotenv import dotenv_values
 
 CONFIG = dotenv_values(".env")
@@ -8,6 +9,7 @@ SECRET_KEY = CONFIG["SECRET_KEY"]
 
 DEBUG = True
 
+runserver.default_port = "3000"
 ALLOWED_HOSTS = []
 
 # contrib.auth is required by templates, and templates are required for docs
@@ -80,6 +82,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+APPEND_SLASH = False
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True

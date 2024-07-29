@@ -2,6 +2,7 @@ import { io } from "socket.io-client";
 
 const SERVER = import.meta.env.VITE_SOCKET_ENDPOINT;
 const API = import.meta.env.VITE_API_ENDPOINT;
+const BACKEND_TYPE = import.meta.env.VITE_BACKEND_TYPE;
 
 /**
  * A wrapper around fetch to make a POST request.
@@ -67,7 +68,7 @@ function authPatch(url, data) {
  * @returns {string | null} the source of the file formatted correctly, null if the fileSrc is null or undefined.
  */
 function formatServerSrc(fileSrc) {
-    return fileSrc ? `${API}/${fileSrc}` : null;
+    return fileSrc ? `${SERVER}/${fileSrc}` : null;
 }
 
 /**
@@ -153,7 +154,7 @@ export async function searchUser(query, page = 1) {
     if (!query) return [];
     const response = await authFetch(`user/search/${query}?page=${page}`);
     if (response?.status !== 200) return [];
-    return (await response.json()).map(formatUser);
+    return (await response.json()).items.map(formatUser);
 }
 
 /**
@@ -162,7 +163,7 @@ export async function searchUser(query, page = 1) {
  * @returns {Promise<boolean>} true if the request was sent, false otherwise.
  */
 export async function addFriend(userId) {
-    const response = await authFetch(`user/addFriend/${userId}`, "POST");
+    const response = await authFetch(`friendship/add/${userId}`, "POST");
     return [200, 201].includes(response?.status);
 }
 
@@ -172,7 +173,7 @@ export async function addFriend(userId) {
  * @returns {Promise<boolean>} true if the friend record was deleted, false otherwise.
  */
 export async function deleteFriend(userId) {
-    const response = await authFetch(`user/deleteFriend/${userId}`, "DELETE");
+    const response = await authFetch(`friendship/remove/${userId}`, "DELETE");
     return response?.status === 200;
 }
 
@@ -185,7 +186,7 @@ export async function getNotifications(page = 1) {
     const response = await authFetch(`notification/?page=${page}`);
     if (response?.status !== 200) return [];
 
-    return (await response.json()).map((n) => {
+    return (await response.json()).items.map((n) => {
         n.data = formatUser(n.data);
         return n;
     });
@@ -215,7 +216,7 @@ export async function getUnreadNotificationCount() {
  * @returns {Promise<Array<object>>} the friends of the user.
  */
 export async function getFriends() {
-    const response = await authFetch("user/friends");
+    const response = await authFetch("friendship");
     return response?.status === 200 ? await response.json() : [];
 }
 
@@ -224,6 +225,7 @@ export async function getFriends() {
  * @returns {Socket | null} the socket connection or null if the user is not logged in.
  */
 export function createSocket() {
+    if (BACKEND_TYPE === "python") return null; // Python backend does not support sockets yet.
     const tokenStore = localStorage.getItem("user");
     if (!tokenStore) return null;
 
@@ -266,9 +268,9 @@ export async function getPost(id) {
  * @returns {Promise<Array<object>>} the comments of the post.
  */
 export async function getPostComments(postId, page = 1) {
-    const response = await authFetch(`/post/${postId}/comments?page=${page}`);
+    const response = await authFetch(`post/${postId}/comments?page=${page}`);
     if (response?.status !== 200) return [];
-    return (await response.json()).map((c) => {
+    return (await response.json()).items.map((c) => {
         c.author = formatUser(c.author);
         c.file = formatServerSrc(c.file);
         return c;
@@ -330,7 +332,7 @@ export async function deleteComment(commentId) {
 export async function getFeed(page = 1) {
     const response = await authFetch(`post/feed?page=${page}`);
     if (response?.status !== 200) return [];
-    return (await response.json()).map((p) => {
+    return (await response.json()).items.map((p) => {
         p.author = formatUser(p.author);
         p.files = p.files.map(formatServerSrc);
         return p;
@@ -345,7 +347,7 @@ export async function getFeed(page = 1) {
 export async function getPostsOfUser(userId, page = 1) {
     const response = await authFetch(`post/ofUser/${userId}?page=${page}`);
     if (response?.status !== 200) return [];
-    return (await response.json()).map((p) => {
+    return (await response.json()).items.map((p) => {
         p.author = formatUser(p.author);
         p.files = p.files.map(formatServerSrc);
         return p;
@@ -358,9 +360,9 @@ export async function getPostsOfUser(userId, page = 1) {
  * @returns {Promise<Array<object>>} the chats of the user.
  */
 export async function getChats(page = 1) {
-    const response = await authFetch(`message/chats/?page=${page}`);
+    const response = await authFetch(`message/chats?page=${page}`);
     if (response?.status !== 200) return [];
-    return (await response.json()).map((c) => formatUser(c));
+    return (await response.json()).items.map((c) => formatUser(c));
 }
 
 /**
@@ -399,7 +401,7 @@ export async function sendMessage(recipientId, content = "", file = null) {
 export async function getMessages(friendId, page = 1) {
     const response = await authFetch(`message/${friendId}?page=${page}`);
     if (response?.status !== 200) return [];
-    const data = await response.json();
+    const data = (await response.json()).items;
     return await Promise.all(
         data.map(async (m) => {
             m.file = await getPrivateFile(m.file);
@@ -414,5 +416,5 @@ export async function getMessages(friendId, page = 1) {
  */
 export async function getUnreadMessageCount() {
     const response = await authFetch("message/unread");
-    return response?.status === 200 ? (await response.json()).unread : 0;
+    return response?.status === 200 ? await response.json() : 0;
 }

@@ -39,15 +39,15 @@ def login(request, data: UserLoginIn):
     if not user or not check_password(data.password, user.password):
         return 401, "Invalid credentials"
 
-    return {"token": create_token(user)}
+    return {"token": create_token(user), "id": user.id}
 
 
-@router.patch("/", response={200: str, 409: str, 422: str})
+@router.patch("", response={200: str, 409: str, 422: str})
 def update(
     request,
     data: Form[UserUpdateIn],
-    profile_image: File[UploadedFile] = None,
-    background_image: File[UploadedFile] = None,
+    profileImage: File[UploadedFile] = None,
+    backgroundImage: File[UploadedFile] = None,
 ):
     """
     Missing or null fields will not be updated.
@@ -56,14 +56,14 @@ def update(
 
     if (
         all(d is None for d in data.dict().values())
-        and not profile_image
-        and not background_image
+        and not profileImage
+        and not backgroundImage
     ):
         return 422, "No data provided"
 
     if (
         data.email
-        and User.objects.filter(email=data.email).exclude(id=request.auth.id).exists()
+        and User.objects.exclude(id=request.auth.id).filter(email=data.email).exists()
     ):
         return 409, "Email already exists"
 
@@ -72,8 +72,8 @@ def update(
         if value is not None:
             setattr(request.auth, key, value)
 
-    save_file(request.auth.profile_image, profile_image, ["image"])
-    save_file(request.auth.background_image, background_image, ["image"])
+    save_file(request.auth.profile_image, profileImage, ["image"])
+    save_file(request.auth.background_image, backgroundImage, ["image"])
 
     request.auth.save()
     return 200, "User updated"

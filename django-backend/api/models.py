@@ -1,8 +1,9 @@
 import uuid
 
+from django.contrib.postgres.expressions import ArraySubquery
+from django.db.models import Count, OuterRef, Exists
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
-from django.db.models import Q
 from django.db import models
 
 
@@ -75,6 +76,19 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     posted_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(max_length=1000, null=True, blank=True)
+
+    @staticmethod
+    def include_extra(queryset, request_user):
+        return queryset.annotate(
+            comment_count=Count("comments", distinct=True),
+            like_count=Count("likes__id", distinct=True),
+            liked=Exists(
+                PostLike.objects.filter(post=OuterRef("id"), liked_by=request_user)
+            ),
+            file=ArraySubquery(
+                PostFile.objects.filter(post__id=OuterRef("id")).values("file")
+            ),
+        ).select_related("author")
 
 
 class PostFile(models.Model):

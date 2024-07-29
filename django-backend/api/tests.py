@@ -127,7 +127,7 @@ class User(TestCase):
 
     def update_user(self, token, data):
         return client.patch(
-            "/api/user/",
+            "/api/user",
             encode_multipart(BOUNDARY, data),
             MULTIPART_CONTENT,
             HTTP_AUTHORIZATION=f"Bearer {token}",
@@ -246,7 +246,7 @@ class TestMessage(TestCase):
 
     def send_message(self, token, recipient_id, content):
         return client.post(
-            "/api/message/",
+            "/api/message",
             {
                 "recipientId": recipient_id,
                 "content": content,
@@ -268,11 +268,11 @@ class TestMessage(TestCase):
     def check_chats(
         self, chats, first_author, first_content, second_author, second_content
     ):
-        self.assertEqual(len(chats), 2)
-        self.assertEqual(chats[0]["firstName"], first_author)
-        self.assertEqual(chats[0]["content"], first_content)
-        self.assertEqual(chats[1]["firstName"], second_author)
-        self.assertEqual(chats[1]["content"], second_content)
+        self.assertEqual(chats["count"], 2)
+        self.assertEqual(chats["items"][0]["firstName"], first_author)
+        self.assertEqual(chats["items"][0]["content"], first_content)
+        self.assertEqual(chats["items"][1]["firstName"], second_author)
+        self.assertEqual(chats["items"][1]["content"], second_content)
 
     def test_messages(self):
         # To not existing user (friendship not found)
@@ -379,4 +379,85 @@ class NotificationTest(TestCase):
 
 
 class PostTest(TestCase):
-    pass  # TODO adds tests for all post related endpoints
+    def get_post(self, token, id):
+        return client.get(f"/api/post/{id}", HTTP_AUTHORIZATION=f"Bearer {token}")
+
+    def get_posts_of_user(self, token, id):
+        return client.get(
+            f"/api/post/ofUser/{id}", HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
+
+    def get_feed(self, token):
+        return client.get("/api/post/feed", HTTP_AUTHORIZATION=f"Bearer {token}")
+
+    def comments_of_post(self, token, id):
+        return client.get(
+            f"/api/post/{id}/comments", HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
+
+    def delete_post(self, token, id):
+        return client.delete(f"/api/post/{id}", HTTP_AUTHORIZATION=f"Bearer {token}")
+
+    def delete_comment(self, token, id):
+        return client.delete(
+            f"/api/post/comment/{id}", HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
+
+    def test_post(self):
+        u1 = register_request(*VALID_CREDENTIALS).json()["id"]
+        u2 = register_request(
+            "Jane", "Doe", "JaneDoe@example.com", VALID_PASSWORD
+        ).json()["id"]
+        t1 = login_request(*VALID_LOGIN).json()["token"]
+        t2 = login_request("JaneDoe@example.com", VALID_PASSWORD).json()["token"]
+
+        # Create post
+        p = create_post(t1, "Hello").json()["id"]
+
+        # Get non existing post
+        self.assertEqual(self.get_post(t1, uuid4()).status_code, 404)
+
+        # Get post
+        self.assertEqual(self.get_post(t1, p).json()["content"], "Hello")
+
+        # Get posts of user
+        self.assertEqual(self.get_posts_of_user(t1, u1).json()["count"], 1)
+
+        # Get feed
+        self.assertEqual(self.get_feed(t1).json()["count"], 1)
+        self.assertEqual(self.get_feed(t2).json()["count"], 0)
+
+        # Become friends
+        friend_request(t1, u2)
+        friend_request(t2, u1)
+
+        # Get feed
+        self.assertEqual(self.get_feed(t2).json()["count"], 1)
+
+        # Like post
+        like_post(t2, p)
+        self.assertEqual(self.get_post(t1, p).json()["likes"], 1)
+
+        # Comment post
+        comment_post(t2, p, "Nice post")
+        self.assertEqual(self.comments_of_post(t1, p).json()["count"], 1)
+
+        comment_id = self.comments_of_post(t1, p).json()["items"][0]["id"]
+        # Delete comment from wrong user
+        self.assertEqual(self.delete_comment(t1, comment_id).status_code, 404)
+
+        # Delete comment
+        self.assertEqual(self.delete_comment(t2, comment_id).status_code, 200)
+
+        # Comment count
+        self.assertEqual(self.comments_of_post(t1, p).json()["count"], 0)
+
+        # Delete post from wrong user
+        self.assertEqual(self.delete_post(t2, p).status_code, 404)
+
+        # Delete post
+        self.assertEqual(self.delete_post(t1, p).status_code, 200)
+
+        # Get feed
+        self.assertEqual(self.get_feed(t1).json()["count"], 0)
+        self.assertEqual(self.get_feed(t2).json()["count"], 0)

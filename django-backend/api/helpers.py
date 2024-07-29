@@ -2,8 +2,8 @@ from typing import Any, Literal, List, Dict
 import uuid
 
 from ninja import Schema, ModelSchema, FilterSchema, NinjaAPI, File, UploadedFile
-from pydantic import UUID4
 from django.db.models import ImageField
+from pydantic import UUID4
 
 from api.models import Notification, Message, User
 
@@ -17,11 +17,12 @@ def camel_case_responses(api: NinjaAPI):
                 op.by_alias = True
 
 
-class CamelCase:
-    def snake_case_to_camel_case(snake_case: str) -> str:
-        words = snake_case.split("_")
-        return words[0] + "".join(word.title() for word in words[1:])
+def snake_case_to_camel_case(snake_case: str) -> str:
+    words = snake_case.split("_")
+    return words[0] + "".join(word.title() for word in words[1:])
 
+
+class CamelCase:
     model_config = dict(alias_generator=snake_case_to_camel_case, populate_by_name=True)
 
 
@@ -82,6 +83,8 @@ def create_notification(recipient_id: UUID4, type: str, data: Dict[str, Any]):
         type (str): The notification type.
         data (dict[str, Any]): The notification data.
     """
+
+    data = {snake_case_to_camel_case(k): v for k, v in data.items()}
 
     Notification.objects.create(recipient_id=recipient_id, type=type, data=data)
     # TODO: Send a push notification to the recipient.
