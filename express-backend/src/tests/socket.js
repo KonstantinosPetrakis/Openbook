@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { addFriend } from "./friends.js";
+import { addFriend } from "./friendship.js";
 import { createUsers } from "./user.js";
 import { sendMessage } from "./message.js";
 import { createPost, createComment, likePost } from "./post.js";

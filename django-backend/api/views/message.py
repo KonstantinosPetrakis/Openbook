@@ -38,7 +38,6 @@ def unread_messages_count(request):
 
 
 @router.get("/chats", response=List[ChatOut])
-@paginate
 def chats(request):
     with connection.cursor() as cursor:
         cursor.execute(

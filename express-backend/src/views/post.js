@@ -160,12 +160,12 @@ router.get("/:id/comments", validator.postExists, async (req, res) => {
         );
     }
 
-    return res.json(comments);
+    return res.json({ items: comments });
 });
 
 router.get("/feed", async (req, res) => {
-    return res.json(
-        (
+    return res.json({
+        items: (
             (await prisma.post.findMany({
                 where: {
                     authorId: {
@@ -178,21 +178,21 @@ router.get("/feed", async (req, res) => {
                 ...selectJoinedPostData(req),
                 ...paginate(req),
             })) || []
-        ).map((p) => processFetchedJoinedPostData(p))
-    );
+        ).map((p) => processFetchedJoinedPostData(p)),
+    });
 });
 
 router.get("/ofUser/:id", isValidUser(), async (req, res) => {
-    return res.json(
-        (
+    return res.json({
+        items: (
             (await prisma.post.findMany({
                 where: { authorId: req.params.id },
                 orderBy: { postedAt: "desc" },
                 ...selectJoinedPostData(req),
                 ...paginate(req),
             })) || []
-        ).map((p) => processFetchedJoinedPostData(p))
-    );
+        ).map((p) => processFetchedJoinedPostData(p)),
+    });
 });
 
 router.get("/:id", validator.postExists, async (req, res) => {

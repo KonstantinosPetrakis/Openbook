@@ -1,4 +1,4 @@
-export const URL = "http:/localhost:3000/api/";
+export const URL = "http://localhost:3000/api/";
 export const USER_PASSWORD = "password";
 export const USERS_TO_CREATE = 10;
 const VERBOSE = false;

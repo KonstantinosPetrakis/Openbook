@@ -19,17 +19,18 @@ export async function createNotification(recipientId, type, data) {
 }
 
 router.get("/", async (req, res) => {
-    return res.json(
-        (await prisma.notification.findMany({
-            where: {
-                recipientId: req.user.id,
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-            ...paginate(req),
-        })) || []
-    );
+    return res.json({
+        items:
+            (await prisma.notification.findMany({
+                where: {
+                    recipientId: req.user.id,
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+                ...paginate(req),
+            })) || [],
+    });
 });
 
 router.get("/count", async (req, res) => {

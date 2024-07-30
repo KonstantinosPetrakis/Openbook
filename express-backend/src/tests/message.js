@@ -7,7 +7,7 @@ import {
     assertCallable,
 } from "./helpers.js";
 import { createUsers } from "./user.js";
-import { addFriend } from "./friends.js";
+import { addFriend } from "./friendship.js";
 
 export async function sendMessage(token, recipientId, text, file) {
     const formData = new FormData();
@@ -31,7 +31,7 @@ export async function sendMessage(token, recipientId, text, file) {
  */
 export async function getMessageWithFriend(token, id) {
     const response = await authFetch(`${URL}/message/${id}`, token);
-    return response.ok ? await response.json() : undefined;
+    return response.ok ? (await response.json()).items : undefined;
 }
 
 export async function getChats(token) {

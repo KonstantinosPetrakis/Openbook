@@ -113,7 +113,7 @@ router.get("/chats", async (req, res) => {
         ORDER BY "sentAt" DESC
     `;
 
-    return res.json(result);
+    return res.json(result.map((r) => formatFileFields(r, ["profileImage"])));
 });
 
 router.get("/unread", async (req, res) => {
@@ -130,8 +130,8 @@ router.get("/:id", async (req, res) => {
         data: { read: true },
     });
 
-    return res.json(
-        (
+    return res.json({
+        items: (
             (await prisma.message.findMany({
                 where: {
                     OR: [
@@ -144,8 +144,8 @@ router.get("/:id", async (req, res) => {
                 },
                 ...paginate(req),
             })) || []
-        ).map((m) => formatFileFields(m, ["file"], true))
-    );
+        ).map((m) => formatFileFields(m, ["file"], true)),
+    });
 });
 
 export default router;

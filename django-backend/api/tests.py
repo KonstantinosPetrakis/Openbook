@@ -7,8 +7,6 @@ from uuid import uuid4
 from django.test import TestCase, Client
 from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
 
-from api.models import User
-
 
 VALID_PASSWORD = "12345678"
 INVALID_PASSWORD = "1234567"
@@ -268,11 +266,11 @@ class TestMessage(TestCase):
     def check_chats(
         self, chats, first_author, first_content, second_author, second_content
     ):
-        self.assertEqual(chats["count"], 2)
-        self.assertEqual(chats["items"][0]["firstName"], first_author)
-        self.assertEqual(chats["items"][0]["content"], first_content)
-        self.assertEqual(chats["items"][1]["firstName"], second_author)
-        self.assertEqual(chats["items"][1]["content"], second_content)
+        self.assertEqual(len(chats), 2)
+        self.assertEqual(chats[0]["firstName"], first_author)
+        self.assertEqual(chats[0]["content"], first_content)
+        self.assertEqual(chats[1]["firstName"], second_author)
+        self.assertEqual(chats[1]["content"], second_content)
 
     def test_messages(self):
         # To not existing user (friendship not found)
@@ -464,17 +462,10 @@ class PostTest(TestCase):
 
 
 class TestRealTime(TestCase):
-    def setUp(self):
-        self.u1 = register_request(*VALID_CREDENTIALS).json()["id"]
-        self.u2 = register_request(
-            "Jane", "Doe" "JaneDoe@example.com", VALID_PASSWORD
-        ).json()["id"]
+    """
+    Well, testing of sockets that need authentication is in django-channels
+    is a nightmare. Seriously I couldn't get it to work. I wasted a lot of time.
+    https://github.com/django/channels/issues/903
+    """
 
-        self.t1 = login_request(*VALID_LOGIN).json()["token"]
-        self.t2 = login_request("JaneDoe@example.com", VALID_PASSWORD).json()["token"]
-
-        friend_request(self.t1, self.u2)
-        friend_request(self.t2, self.u1)
-
-    async def test_real_time(self):
-        pass
+    pass

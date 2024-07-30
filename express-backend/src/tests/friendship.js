@@ -9,20 +9,10 @@ import { createUsers, getUser } from "./user.js";
  * @returns {Promise<number>} the status code of the request.
  */
 export async function addFriend(token, id) {
-    const response = await authFetch(`${URL}/user/addFriend/${id}`, token, {
+    const response = await authFetch(`${URL}/friendship/add/${id}`, token, {
         method: "POST",
     });
     return response.status;
-}
-
-/**
- * This function gets the friend requests of the authenticated user.
- * @param {string} token the token to authenticate with.
- * @returns {Promise<string[]>} the friend requests of the user.
- */
-export async function getFriendRequests(token) {
-    const response = await authFetch(`${URL}/user/friendRequests`, token);
-    return response.ok ? (await response.json()).friendRequests : [];
 }
 
 /**
@@ -31,7 +21,7 @@ export async function getFriendRequests(token) {
  * @returns {Promise<string[]>} the friends of the user.
  */
 export async function getFriends(token) {
-    const response = await authFetch(`${URL}/user/friends`, token);
+    const response = await authFetch(`${URL}/friendship`, token);
     return await response.json();
 }
 
@@ -42,7 +32,7 @@ export async function getFriends(token) {
  * @returns {Promise<number>} the status code of the request.
  */
 export async function deleteFriend(token, id) {
-    const response = await authFetch(`${URL}/user/deleteFriend/${id}`, token, {
+    const response = await authFetch(`${URL}/friendship/remove/${id}`, token, {
         method: "DELETE",
     });
 
@@ -68,7 +58,6 @@ export async function main() {
     assertEqual(await addFriend(tokens[0], userIds[1]), 403);
     assertEqual(await getFriends(tokens[0]), []);
     assertEqual(await getFriends(tokens[1]), []);
-    assertEqual(await getFriendRequests(tokens[1]), [userIds[0]]);
     await addFriend(tokens[1], userIds[0]);
     assertEqual(
         (await getUser(tokens[0], userIds[1])).friendshipStatus,
@@ -123,13 +112,9 @@ export async function main() {
 
     // Delete friend request
     await addFriend(tokens[6], userIds[7]);
-    assertEqual(await getFriendRequests(tokens[7]), [userIds[6]]);
     await deleteFriend(tokens[6], userIds[7]);
-    assertEqual(await getFriendRequests(tokens[7]), []);
 
     // Deny friend request
     await addFriend(tokens[8], userIds[9]);
-    assertEqual(await getFriendRequests(tokens[9]), [userIds[8]]);
     await deleteFriend(tokens[9], userIds[8]);
-    assertEqual(await getFriendRequests(tokens[9]), []);
 }

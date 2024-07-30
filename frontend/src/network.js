@@ -399,7 +399,7 @@ export async function getPostsOfUser(userId, page = 1) {
 export async function getChats(page = 1) {
     const response = await authFetch(`message/chats?page=${page}`);
     if (response?.status !== 200) return [];
-    return (await response.json()).items.map((c) => formatUser(c));
+    return (await response.json()).map((c) => formatUser(c));
 }
 
 /**

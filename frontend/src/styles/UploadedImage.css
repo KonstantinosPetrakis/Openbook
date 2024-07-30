@@ -29,11 +29,18 @@ label:has(input[type="file"]:focus) {
 
 .image-editor {
     display: flex;
-    justify-content: center;
     align-items: center;
     flex-direction: column;
+    height: 100%;
+    gap: 10px;
 }
 
-.image-editor button {
-    margin: 10px;
+.image-editor .ReactCrop {
+    min-height: 0;
+    flex-grow: 1;
+}
+
+.ReactCrop__child-wrapper,
+.image-editor img {
+    height: 100%;
 }

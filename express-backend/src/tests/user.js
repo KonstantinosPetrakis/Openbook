@@ -99,7 +99,7 @@ export async function createUsers() {
  */
 export async function searchUser(token, query) {
     const response = await authFetch(`${URL}/user/search/${query}`, token);
-    return response.ok ? await response.json() : undefined;
+    return response.ok ? (await response.json()).items : undefined;
 }
 
 /**

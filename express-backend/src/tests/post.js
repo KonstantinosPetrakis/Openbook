@@ -6,7 +6,7 @@ import {
     sleep,
 } from "./helpers.js";
 
-import { addFriend } from "./friends.js";
+import { addFriend } from "./friendship.js";
 import { createUsers } from "./user.js";
 
 /**
@@ -58,7 +58,7 @@ export async function getPost(token, id) {
  */
 export async function getPostsOfUser(token, id) {
     const response = await authFetch(`${URL}/post/ofUser/${id}`, token);
-    return response.ok ? await response.json() : undefined;
+    return response.ok ? (await response.json()).items : undefined;
 }
 
 /**
@@ -114,7 +114,7 @@ export async function deleteComment(token, id) {
  */
 export async function getComments(token, id) {
     const response = await authFetch(`${URL}/post/${id}/comments`, token);
-    return response.ok ? await response.json() : undefined;
+    return response.ok ? (await response.json()).items : undefined;
 }
 
 /**
@@ -124,7 +124,7 @@ export async function getComments(token, id) {
  */
 export async function getFeed(token) {
     const response = await authFetch(`${URL}/post/feed`, token);
-    return response.ok ? await response.json() : undefined;
+    return response.ok ? (await response.json()).items : undefined;
 }
 
 /**

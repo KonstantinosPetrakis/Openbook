@@ -1,6 +1,6 @@
 import { URL, authFetch, assertCallable, assertEqual } from "./helpers.js";
 import { createUsers } from "./user.js";
-import { addFriend } from "./friends.js";
+import { addFriend } from "./friendship.js";
 import { createPost, createComment, likePost } from "./post.js";
 
 /**
@@ -10,7 +10,7 @@ import { createPost, createComment, likePost } from "./post.js";
  */
 async function getNotifications(token) {
     const response = await authFetch(`${URL}/notification`, token);
-    return response.ok ? await response.json() : [];
+    return response.ok ? (await response.json()).items : [];
 }
 
 /**
