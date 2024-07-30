@@ -3,13 +3,16 @@
 ## Overview
 An open source toy social media platform built with React and 2 identical backends, one in Django Ninja and one in Express.js.
 
-<img src="docs/register.png" width="300px">
-<img src="docs/login.png" width="300px">
-<img src="docs/profile.png" width="300px">
-<img src="docs/notifications.png" width="300px">
-<img src="docs/search.png" width="300px">
-<img src="docs/post.png" width="300px">
-<img src="docs/chat.png" width="300px">
+<p>
+    <img src="docs/register.png" width="300px">
+    <img src="docs/login.png" width="300px">
+    <img src="docs/profile.png" width="300px">
+    <img src="docs/notifications.png" width="300px">
+    <img src="docs/search.png" width="300px">
+    <img src="docs/post.png" width="300px">
+    <img src="docs/chat.png" width="300px">
+</p>
+
 
 ## Development install
 ### Frontend
