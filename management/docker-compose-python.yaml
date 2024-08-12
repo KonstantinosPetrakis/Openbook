@@ -1,0 +1,58 @@
+services:
+    frontend:
+        build:
+            context: ..
+            dockerfile: ./management/frontend.dockerfile
+        env_file:
+            - .env
+        volumes:
+            - ../storage/frontend-dist:/frontend/dist
+
+    database:
+        image: postgres:16-alpine
+        restart: always
+        shm_size: 2GB
+        env_file:
+            - .env
+        volumes:
+            - ./postgresql.conf:/etc/postgresql.conf:ro
+            - ../storage/postgres-data:/var/lib/postgresql/data
+        networks:
+            - backend
+        command: postgres -c config_file=/etc/postgresql.conf
+
+    backend:
+        build:
+            context: ..
+            dockerfile: ./management/django-backend.dockerfile
+        restart: always
+        env_file:
+            - .env
+        volumes:
+            - ../storage/public:/django-backend/public
+            - ../storage/private:/django-backend/private
+        networks:
+            - backend
+        depends_on:
+            - database 
+
+    reverse-proxy:
+        image: nginx:1-alpine
+        restart: always
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf:ro
+            - ../storage/frontend-dist:/storage/frontend-dist
+            - ../storage/public:/storage/public
+            - ../storage/private:/storage/private
+        networks:
+            - backend
+        ports:
+            - "80:80"
+        depends_on:
+            frontend:
+                condition: service_completed_successfully
+            backend:
+                condition: service_started
+networks:
+    backend:
+        driver: bridge

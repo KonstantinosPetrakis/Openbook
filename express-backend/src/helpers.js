@@ -40,9 +40,8 @@ export function paginate(req) {
  */
 export async function createStorageDirectories() {
     try {
-        await fs.mkdir("storage");
-        await fs.mkdir("storage/private");
-        await fs.mkdir("storage/public");
+        await fs.mkdir("public");
+        await fs.mkdir("private");
     } catch (error) {}
 }
 
@@ -52,7 +51,7 @@ export async function createStorageDirectories() {
  * @returns {string} the path of the file in the file system.
  */
 export function getPublicFileDirectory(fileName) {
-    return `storage/public/${fileName}`;
+    return `public/${fileName}`;
 }
 
 /**
@@ -60,7 +59,7 @@ export function getPublicFileDirectory(fileName) {
  * @param {string} fileName the name of the file.
  */
 export function getPrivateFileDirectory(fileName) {
-    return `storage/private/${fileName}`;
+    return `private/${fileName}`;
 }
 
 /**
@@ -79,10 +78,7 @@ export function getPublicFileURL(fileName) {
  * @returns {string} the public path of the file.
  */
 export function getPrivateFileURL(fileName) {
-    const token = jwt.sign({ fileName }, process.env.SECRET_KEY || "", {
-        expiresIn: "1m",
-    });
-    return `/private/${token}`;
+    return `/private/${fileName}`;
 }
 
 /**
@@ -176,39 +172,3 @@ export function formatFileFields(object, fields, priv = false) {
     return newObj;
 }
 
-/**
- * This function is used to stream a video file.
- * @param {object} req the request object from express.
- * @param {object} res the response object from express.
- * @param {string} fileName the name of the video file, including the directory.
- */
-export async function handleVideoStream(req, res, fileName) {
-    let file;
-    try {
-        file = await fs.stat(fileName);
-    } catch (error) {
-        return res.sendStatus(404);
-    }
-
-    const range = req.headers.range;
-    if (!range) {
-        res.writeHead(200, {
-            "Content-Length": file.size,
-            "Content-Type": `video/${fileName.split(".")[1]}`,
-        });
-        return createReadStream(fileName).pipe(res);
-    }
-
-    const parts = range.replace(/bytes=/, "").split("-");
-    const start = +parts[0];
-    const end = parts[1] ? +parts[1] : file.size - 1;
-    const chunkSize = end - start + 1;
-
-    res.writeHead(206, {
-        "Content-Range": `bytes ${start}-${end}/${file.size}`,
-        "Content-Type": `video/${fileName.split(".")[1]}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": chunkSize,
-    });
-    return createReadStream(fileName, { start, end }).pipe(res);
-}

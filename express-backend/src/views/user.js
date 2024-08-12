@@ -46,7 +46,7 @@ router.post("/login", validator.loginValidator, async (req, res) => {
         return res.sendStatus(401);
 
     return res.json({
-        token: jwt.sign({ id: user.id }, process.env.SECRET_KEY || "", {
+        token: jwt.sign({ id: user.id }, process.env.SECRET || "", {
             expiresIn: "7d",
         }),
         id: user.id,

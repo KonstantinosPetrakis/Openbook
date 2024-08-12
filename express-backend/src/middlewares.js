@@ -22,7 +22,7 @@ export async function checkToken(req, res, next) {
         if (!token) return res.sendStatus(401);
 
         try {
-            const payload = jwt.verify(token, process.env.SECRET_KEY || "");
+            const payload = jwt.verify(token, process.env.SECRET || "");
             if (!isValidPayload(payload)) return res.sendStatus(401);
 
             req.user = await prisma.user.update({

@@ -13,6 +13,7 @@ export default function MessageList({ data, setData }) {
 
     useEffect(() => {
         const onNewMessageHandler = (m) => {
+            if (m.file && m.file.startsWith("/")) m.file = m.file.substring(1);
             if (m.senderId === id) setData((data) => [m, ...data]);
         };
 

@@ -1,10 +1,8 @@
 import { Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import fs from "fs/promises";
-import { getPrivateFileDirectory } from "./helpers.js";
-import prisma from "./db.js";
 
-const socketUserMap = {};
+import { emitter } from "./worker.js";
+import prisma from "./db.js";
 
 /**
  * This is a middleware function that checks if the user is authenticated.
@@ -14,19 +12,18 @@ const socketUserMap = {};
 export async function authMiddleware(socket, next) {
     const token = socket.handshake.auth.token;
     try {
-        const payload = jwt.verify(token, process.env.SECRET_KEY || "");
+        const payload = jwt.verify(token, process.env.SECRET || "");
         if (!payload.id) return next(new Error("Unauthorized"));
 
-        socket.user = await prisma.user.findUnique({
+        socket.user = await prisma.user.update({
             where: { id: payload.id },
+            data: { socketId: socket.id },
         });
-
         if (!socket.user) return next(new Error("Unauthorized"));
     } catch (error) {
         return next(new Error("Unauthorized"));
     }
 
-    socketUserMap[socket.user.id] = socket;
     next();
 }
 
@@ -36,7 +33,12 @@ export async function authMiddleware(socket, next) {
  * @param {Socket} socket the socket object.
  */
 export async function onUserConnected(socket) {
-    socket.on("disconnect", () => delete socketUserMap[socket.user.id]);
+    socket.on("disconnect", async () => {
+        await prisma.user.update({
+            where: { id: socket.user.id },
+            data: { socketId: null },
+        });
+    });
 }
 
 /**
@@ -44,8 +46,13 @@ export async function onUserConnected(socket) {
  * @param {object} messageData the message data.
  */
 export async function updateUserForNewMessage(messageData) {
-    const socket = socketUserMap[messageData.recipientId];
-    if (socket) socket.emit("NEW_MESSAGE", messageData);
+    const socketId = (
+        await prisma.user.findUnique({
+            where: { id: messageData.recipientId },
+        })
+    ).socketId;
+
+    emitter.to(socketId).emit("NEW_MESSAGE", messageData);
 }
 
 /**
@@ -53,7 +60,9 @@ export async function updateUserForNewMessage(messageData) {
  * they can pull the new notifications.
  * @param {string} userId the user id.
  */
-export function updateUserForNewNotification(userId) {
-    const socket = socketUserMap[userId];
-    if (socket) socket.emit("NEW_NOTIFICATION");
+export async function updateUserForNewNotification(userId) {
+    const socketId = (await prisma.user.findUnique({ where: { id: userId } }))
+        .socketId;
+
+    emitter.to(socketId).emit("NEW_NOTIFICATION");
 }

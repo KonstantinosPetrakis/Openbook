@@ -27,6 +27,9 @@ export default function FileGallery({ files }) {
         (async () => {
             setFilesWithTypes(
                 await Promise.all(
+                    // For private files nothing better can be done than to fetch them
+                    // For public files type type could be determined from the URL
+                    // So videos can be streamed instead of downloaded, a big improvement
                     files.map(async (f) => {
                         const fetchFunc = f.includes("private")
                             ? authFetch

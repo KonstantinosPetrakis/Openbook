@@ -2,15 +2,16 @@ from pathlib import Path
 from django.core.management.commands.runserver import Command as runserver
 from dotenv import dotenv_values
 
-CONFIG = dotenv_values(".env")
+CONFIG = dotenv_values()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = CONFIG["SECRET_KEY"]
+SECRET_KEY = CONFIG["SECRET"]
 
-DEBUG = True
+DEBUG = CONFIG["DEBUG"] == "1"
 
+# It's ok for dev and production since it's behind a reverse proxy in a docker container
 runserver.default_port = "3000"
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # contrib.auth is required by templates, and templates are required for docs
 INSTALLED_APPS = [
@@ -22,6 +23,7 @@ INSTALLED_APPS = [
     "api",
     "ninja",
     "django_cleanup.apps.CleanupConfig",
+    "channels_postgres",
 ]
 
 MIDDLEWARE = [
@@ -35,20 +37,6 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
-
-
-# Works as long it runs in a single container and with the channel names
-# being written to the db for different threads to read.
-# Not recommended for production, redis should be used instead.
-# More info: https://channels.readthedocs.io/en/latest/topics/channel_layers.html#in-memory-channel-layer
-# Postgres backend also looks good if extra container is too much:
-# https://github.com/danidee10/channels_postgres
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
-
 
 ROOT_URLCONF = "openbook.urls"
 
@@ -74,13 +62,23 @@ ASGI_APPLICATION = "openbook.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": CONFIG["DB_NAME"],
-        "USER": CONFIG["DB_USER"],
-        "PASSWORD": CONFIG["DB_PASSWORD"],
-        "HOST": CONFIG["DB_HOST"],
-        "PORT": CONFIG["DB_PORT"],
+        "NAME": CONFIG["POSTGRES_DB"],
+        "USER": CONFIG["POSTGRES_USER"],
+        "PASSWORD": CONFIG["POSTGRES_PASSWORD"],
+        "HOST": CONFIG["POSTGRES_HOST"],
+        "PORT": CONFIG["POSTGRES_PORT"],
     }
 }
+
+DATABASES["channels_postgres"] = DATABASES["default"]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+        "CONFIG": DATABASES["default"],
+    }
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

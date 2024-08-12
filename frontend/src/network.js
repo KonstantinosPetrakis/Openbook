@@ -1,6 +1,10 @@
 import { io } from "socket.io-client";
 
-const SERVER = import.meta.env.VITE_SOCKET_ENDPOINT;
+const SERVER =
+    import.meta.env.VITE_SOCKET_ENDPOINT === "/"
+        ? `${window.location.host}/`
+        : import.meta.env.VITE_SOCKET_ENDPOINT;
+        
 const API = import.meta.env.VITE_API_ENDPOINT;
 const BACKEND_TYPE = import.meta.env.VITE_BACKEND_TYPE;
 
@@ -13,7 +17,7 @@ const SOCKET_PYTHON_CALLBACKS = {};
  * @returns {Promise<Response>} the response of the request.
  */
 function post(url, data) {
-    return fetch(`${API}/${url}`, {
+    return fetch(`${API}${url}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -43,7 +47,7 @@ export function authFetch(url, method = "GET", data = {}, headers = {}) {
 
     if (!token) return null;
 
-    return fetch(`${API}/${url}`, {
+    return fetch(`${API}${url}`, {
         method,
         headers: {
             Authorization: `Bearer ${token}`,
@@ -72,7 +76,7 @@ function authPatch(url, data) {
 function formatServerSrc(fileSrc) {
     if (!fileSrc) return null;
     if (fileSrc.startsWith("/")) fileSrc = fileSrc.substring(1);
-    return `${SERVER}/${fileSrc}`;
+    return `http://${SERVER}${fileSrc}`; // Server includes the slash at the end.
 }
 
 /**
@@ -233,7 +237,7 @@ export async function createSocket() {
     if (!tokenStore) return null;
 
     if (BACKEND_TYPE === "python") {
-        const socket = new WebSocket("ws://localhost:3000/ws");
+        const socket = new WebSocket("ws://" + SERVER + "ws");
 
         return new Promise(
             (resolve) =>
@@ -267,7 +271,9 @@ export async function createSocket() {
     }
 
     const token = JSON.parse(tokenStore).token;
-    return token ? io(SERVER, { auth: { token } }) : null;
+    return token
+        ? io(SERVER, { auth: { token }, transports: ["websocket"] })
+        : null;
 }
 
 /**
@@ -409,6 +415,9 @@ export async function getChats(page = 1) {
  */
 export async function getPrivateFile(fileUrl) {
     if (!fileUrl) return null;
+
+    if (fileUrl.startsWith("/")) fileUrl = fileUrl.substring(1);
+
     const response = await authFetch(fileUrl);
     return URL.createObjectURL(await response.blob());
 }

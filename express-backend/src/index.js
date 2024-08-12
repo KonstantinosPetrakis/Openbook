@@ -1,32 +1,20 @@
-import express from "express";
+import cluster from "cluster";
 import dotenv from "dotenv";
-import http from "http";
-import cors from "cors";
-import { Server } from "socket.io";
+import os from "os";
 
-import router from "./router.js";
-import { onUserConnected, authMiddleware } from "./socket.js";
-import { checkToken } from "./middlewares.js";
 import { createStorageDirectories } from "./helpers.js";
-
-dotenv.config();
-
-const DEBUG = process.env.DEBUG === "true";
-const port = process.env.PORT || 3000;
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: DEBUG ? { origin: "*" } : {} });
+import { createServer } from "./worker.js";
 
 createStorageDirectories();
-if (DEBUG) app.use(cors());
-io.use(authMiddleware);
-app.use(checkToken);
-app.use(express.json());
-app.use("/public", express.static("storage/public"));
-app.use("/api", router);
+dotenv.config();
+const DEBUG = process.env.DEBUG === "1";
+const PORT = process.env.PORT || 3000;
 
-io.on("connection", onUserConnected);
+if (cluster.isPrimary) {
+    for (let i = 0; i < os.cpus().length; i++) cluster.fork();
 
-server.listen(port, () => {
-    console.log(`[server]: Server is running at http://localhost:${port}`);
-});
+    cluster.on("exit", (worker, code, signal) => {
+        console.log(`Worker process ${worker.process.pid} died. Restarting...`);
+        cluster.fork();
+    });
+} else createServer(DEBUG, PORT);

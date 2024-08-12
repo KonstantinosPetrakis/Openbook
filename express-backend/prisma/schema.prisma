@@ -49,6 +49,7 @@ model User {
     occupation         String              @default("")
     education          String              @default("")
     hobbies            String              @default("")
+    socketId           String?
 
     friendsAdded     Friendship[]   @relation("friendsAdded")
     friendsAccepted  Friendship[]   @relation("friendsAccepted")
@@ -126,6 +127,6 @@ model Message {
     recipient   User     @relation("recievedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
     recipientId String
     content     String
-    file        String?
+    file        String?  @unique
     read        Boolean  @default(false)
 }

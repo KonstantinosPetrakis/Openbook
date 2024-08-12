@@ -41,7 +41,7 @@ api_router.add_router("post", post_router)
 
 
 if not settings.DEBUG:
-    api.add_router("/private", private_router)
+    api_router.add_router("/private", private_router)
 
 camel_case_responses(api)
 
