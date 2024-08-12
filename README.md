@@ -19,7 +19,7 @@ An open source toy social media platform built with React and 2 identical backen
 ```bash
 cd management
 cp .env.example .env # You can change credentials and choose backend type here (python or node), default is python
-# Run one of the following (configure .env fzile accordingly)
+# Run one of the following (configure .env file accordingly)
 sudo docker compose -f ./docker-compose-python.yaml # For Django backend (default)
 sudo docker compose -f ./docker-compose-node.yaml # For Express backend
 ```
